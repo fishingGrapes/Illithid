@@ -1,0 +1,3 @@
+[submodule "Illithid/vendor/spdlog"]
+	path = Illithid/vendor/spdlog
+	url = https://github.com/gabime/spdlog.git

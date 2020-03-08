@@ -15,7 +15,7 @@ workspace "Illithid"
 
 
 --configuration-platform-architecture (Debug-Windows-x64)
-outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architrcture}"
+outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 --Include directories relative to the root folder (solution directory)
 IncludeDir = {}
@@ -30,8 +30,8 @@ project "Illithid"
 	--Multithreaded vs Multithreaded DLL (CRT packaged statically with binary)
 	staticruntime "on"
 
-	targetDir ("binaries/" .. outputdir .. "/%{prj.name}")
-	objDir ("binaries/intermediates/" .. outputdir .. "/%{prj.name}")
+	targetdir ("binaries/" .. outputdir .. "/%{prj.name}")
+	objdir ("binaries/intermediates/" .. outputdir .. "/%{prj.name}")
 
 	--Set the precompiled header
 	pchheader ("ilpch.h")
@@ -46,8 +46,8 @@ project "Illithid"
 
 	includedirs
 	{
-		"%{prj.name/src}",
-		"%{IncludeDir.spdlog"}
+		"%{prj.name}/src",
+		"%{IncludeDir.spdlog}"
 	}
 
 	links
@@ -89,8 +89,8 @@ project "Sandbox"
 	staticruntime "on"
 
 
-	targetDir ("binaries/" .. outputdir .. "/%{prj.name}")
-	objDir ("binaries/intermediates/" .. outputdir .. "/%{prj.name}")
+	targetdir ("binaries/" .. outputdir .. "/%{prj.name}")
+	objdir ("binaries/intermediates/" .. outputdir .. "/%{prj.name}")
 
 	files
 	{
@@ -100,11 +100,21 @@ project "Sandbox"
 
 	includedirs
 	{
-		"%{IncludeDir.Illithid}",
+		"Illithid/src",
 		"%{IncludeDir.spdlog}"
 	}
 
 	links { "Illithid" }
+
+	filter "system:windows"
+			systemversion "latest"
+			buildoptions { "/Zc:__cplusplus" }
+
+			defines
+			{
+				"IL_PLATFORM_WINDOWS"
+			}
+
 
 	filter "configurations:Debug"
 			defines { "IL_DEBUG", "IL_ENABLE_ASSERTS" }
