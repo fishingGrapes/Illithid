@@ -20,7 +20,14 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 --Include directories relative to the root folder (solution directory)
 IncludeDir = {}
 IncludeDir["spdlog"] = "Illithid/vendor/spdlog/include"
+IncludeDir["GLFW"] = "Illithid/vendor/GLFW/include"
+IncludeDir["GLAD"] = "Illithid/vendor/GLAD/include"
 
+
+group "dependencies"
+	include ("Illithid/vendor/GLFW")
+	include ("Illithid/vendor/GLAD")
+group ""
 
 project "Illithid"
 	location "Illithid"
@@ -47,11 +54,15 @@ project "Illithid"
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{IncludeDir.spdlog}"
+		"%{IncludeDir.spdlog}",
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.GLAD}"
 	}
 
 	links
 	{
+		"GLFW",
+		"GLAD",
 		"opengl32.lib"
 	}
 
