@@ -7,6 +7,7 @@ namespace itd
 	class Log
 	{
 	public:
+		Log() = delete;
 		static void Initialize( );
 
 		inline static std::shared_ptr<spdlog::logger> GetCoreLogger( )
