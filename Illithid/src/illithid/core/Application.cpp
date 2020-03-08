@@ -1,10 +1,13 @@
 #include "ilpch.h"
 #include "Application.h"
 
+#include "Log.h"
+
 namespace itd
 {
 	Application::Application( )
 	{
+		this->Initialize( );
 	}
 	Application::~Application( )
 	{
@@ -12,7 +15,13 @@ namespace itd
 
 	void Application::Run( )
 	{
-		std::cout << "Starting Application..." << std::endl;
 		while (true);
+	}
+	void Application::Initialize( )
+	{
+		//Change this to take a log-level
+		Log::Initialize( );
+
+		IL_CORE_INFO( "Logger Initialized." );
 	}
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-
 #ifdef IL_PLATFORM_WINDOWS
 
 //Trust me, this function is defined somewhere
@@ -12,6 +11,8 @@ int main( int argc, char** argv )
 	app->Run( );
 	delete app;
 }
+
+#define SET_ILLITHID_APPLICATION(x) itd::Application* itd::CreateApplication( ){return new x( );}
 
 #else
 

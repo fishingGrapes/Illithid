@@ -9,6 +9,9 @@ namespace itd
 		virtual ~Application( );
 
 		void Run( );
+
+	private:
+		void Initialize();
 	};
 
 	//Just the Declaration, defined in client with the child class
