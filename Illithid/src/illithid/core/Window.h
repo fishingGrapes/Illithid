@@ -1,5 +1,11 @@
 #pragma once
+
 #include <string>
+#include<functional>
+
+#include "illithid/events/Event.h"
+
+struct GLFWwindow;
 
 namespace itd
 {
@@ -20,31 +26,24 @@ namespace itd
 
 	class Window
 	{
+		using EventListener = std::function<void( Event& )>;
+
 	public:
-		explicit Window( const WindowProperties& props ) :
-			windowProps_( props ), isVsync_( true )
-		{
-		}
+		explicit Window( const WindowProperties& props );
+		~Window( );
 
-		virtual ~Window( )
-		{
-		}
+		void PollEvents( );
+		void SwapBuffers( );
 
-		virtual void Update( ) = 0;
-
-		void SetVsync( bool value )
-		{
-			isVsync_ = value;
-		}
 
 		inline uint32_t Width( ) const
 		{
-			return windowProps_.Width;
+			return windowData_.Width;
 		}
 
 		inline uint32_t Height( ) const
 		{
-			return windowProps_.Height;
+			return windowData_.Height;
 		}
 
 		inline bool IsVsync( ) const
@@ -52,8 +51,33 @@ namespace itd
 			return isVsync_;
 		}
 
-	protected:
-		WindowProperties windowProps_;
+		inline void SetVsync( bool value )
+		{
+			isVsync_ = value;
+		}
+
+		inline void SetEventListener( const EventListener& listener )
+		{
+			windowData_.Listener = listener;
+		}
+
+	private:
+
+		struct WindowData
+		{
+		public:
+			uint32_t Width;
+			uint32_t Height;
+			std::string Title;
+
+			EventListener Listener;
+		};
+
+		WindowData windowData_;
 		bool isVsync_;
+		GLFWwindow* window_;
+
+		void Initialize( );
+		void Cleanup( );
 	};
 }

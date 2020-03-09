@@ -1,6 +1,7 @@
 #pragma once
 
 #include "spdlog/logger.h"
+#include "spdlog/fmt/ostr.h"
 
 namespace itd
 {
@@ -29,11 +30,11 @@ namespace itd
 
 #if defined(IL_DEBUG) || defined(IL_RELEASE)
 
-#define IL_CORE_TRACE(...)	    ::itd::Log::GetCoreLogger()->trace(__VA_ARGS__)
-#define IL_CORE_INFO(...)       ::itd::Log::GetCoreLogger()->info(__VA_ARGS__)
-#define IL_CORE_WARN(...)       ::itd::Log::GetCoreLogger()->warn(__VA_ARGS__)
-#define IL_CORE_ERROR(...)      ::itd::Log::GetCoreLogger()->error(__VA_ARGS__)
-#define IL_CORE_CRITICAL(...)   ::itd::Log::GetCoreLogger()->critical(__VA_ARGS__)
+#define IL_CORE_TRACE(...)	    itd::Log::GetCoreLogger()->trace(__VA_ARGS__)
+#define IL_CORE_INFO(...)       itd::Log::GetCoreLogger()->info(__VA_ARGS__)
+#define IL_CORE_WARN(...)       itd::Log::GetCoreLogger()->warn(__VA_ARGS__)
+#define IL_CORE_ERROR(...)      itd::Log::GetCoreLogger()->error(__VA_ARGS__)
+#define IL_CORE_CRITICAL(...)   itd::Log::GetCoreLogger()->critical(__VA_ARGS__)
 
 #define IL_TRACE(...)	   ::itd::Log::GetClientLogger()->trace(__VA_ARGS__)
 #define IL_INFO(...)       ::itd::Log::GetClientLogger()->info(__VA_ARGS__)
