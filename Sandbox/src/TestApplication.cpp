@@ -1,6 +1,5 @@
-#include "Illithid/core/Application.h"
-#include "Illithid/core/EntryPoint.h"
-
+#include "Illithid.h"
+#include "illithid/core/EntryPoint.h"
 
 class TestApplication : public itd::Application
 {

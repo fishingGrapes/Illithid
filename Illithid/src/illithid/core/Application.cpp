@@ -3,6 +3,7 @@
 
 #include "Log.h"
 #include "Window.h"
+#include "Macros.h"
 
 namespace itd
 {
@@ -19,10 +20,6 @@ namespace itd
 
 	void Application::Run( )
 	{
-		WindowResizedEvent evnt( 1280, 720 );
-		IL_CORE_TRACE( evnt );
-
-
 		while (isRunning_)
 		{
 			window_->SwapBuffers( );
@@ -49,6 +46,8 @@ namespace itd
 	}
 	bool Application::OnWindowClosed( WindowClosedEvent& event )
 	{
+		IL_CORE_INFO( "Window Closed." );
+
 		isRunning_ = false;
 		return true;
 	}
