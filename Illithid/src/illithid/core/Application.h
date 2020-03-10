@@ -6,6 +6,7 @@
 namespace itd
 {
 	class Window;
+
 	class Application
 	{
 	public:
@@ -13,11 +14,19 @@ namespace itd
 		virtual ~Application( );
 
 		void Run( );
-		void OnEvent( Event& event );
+		void OnEvent( std::shared_ptr<Event> event );
+
+
+		virtual void Start( ) = 0;
+		virtual void Shutdown( ) = 0;
+		virtual void Tick( double_t at, double_t dt ) = 0;
+		virtual void FixedTick( double_t dt ) = 0;
+		virtual void LateTick( double_t at, double_t dt ) = 0;
 
 	private:
 		void Initialize( );
-		bool OnWindowClosed( WindowClosedEvent& event  );
+		void Destroy( );
+		bool OnWindowClosed( WindowClosedEvent& event );
 
 		std::unique_ptr<Window> window_;
 		bool isRunning_;

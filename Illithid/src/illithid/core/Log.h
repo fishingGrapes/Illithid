@@ -28,6 +28,7 @@ namespace itd
 	};
 }
 
+
 #if defined(IL_DEBUG) || defined(IL_RELEASE)
 
 #define IL_CORE_TRACE(...)	    itd::Log::GetCoreLogger()->trace(__VA_ARGS__)

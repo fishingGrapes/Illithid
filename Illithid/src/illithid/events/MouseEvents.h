@@ -40,7 +40,7 @@ namespace itd
 	class MouseScrolledEvent : public Event
 	{
 	public:
-		explicit MouseScrolledEvent( float_t x, float_t y ) :scrollX_( x ), scrollY_( y )
+		explicit MouseScrolledEvent( float_t xOffset, float_t yOffset ) :scrollX_( xOffset ), scrollY_( yOffset )
 		{
 
 		}

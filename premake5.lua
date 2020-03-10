@@ -22,6 +22,7 @@ IncludeDir = {}
 IncludeDir["spdlog"] = "Illithid/vendor/spdlog/include"
 IncludeDir["GLFW"] = "Illithid/vendor/GLFW/include"
 IncludeDir["GLAD"] = "Illithid/vendor/GLAD/include"
+IncludeDir["glm"] = "Illithid/vendor/glm"
 
 
 group "dependencies"
@@ -56,7 +57,8 @@ project "Illithid"
 		"%{prj.name}/src",
 		"%{IncludeDir.spdlog}",
 		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.GLAD}"
+		"%{IncludeDir.GLAD}",
+		"%{IncludeDir.glm}"
 	}
 
 	links
@@ -112,7 +114,8 @@ project "Sandbox"
 	includedirs
 	{
 		"Illithid/src",
-		"%{IncludeDir.spdlog}"
+		"%{IncludeDir.spdlog}",
+		"%{IncludeDir.glm}"
 	}
 
 	links { "Illithid" }

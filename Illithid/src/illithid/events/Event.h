@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include <ostream>
+#include <memory>
 
 namespace itd
 {
@@ -36,7 +37,7 @@ namespace itd
 		using EventFunction = std::function<bool( T& )>;
 
 	public:
-		explicit EventDispatcher( Event& event ) : event_( event )
+		explicit EventDispatcher( std::shared_ptr<Event> event ) : event_( event )
 		{
 
 		}
@@ -44,16 +45,16 @@ namespace itd
 		template<typename T>
 		bool Dispatch( EventFunction<T> func )
 		{
-			if (event_.GetType( ) == T::Type( ))
+			if (event_->GetType( ) == T::Type( ))
 			{
-				event_.handled_ = func( *( (T*) &event_ ) );
+				event_->handled_ = func( *( (T*) event_.get( ) ) );
 				return true;
 			}
 			return false;
 		}
 
 	private:
-		Event& event_;
+		std::shared_ptr<Event> event_;
 	};
 
 	inline std::ostream& operator<< ( std::ostream& os, const Event& evnt )

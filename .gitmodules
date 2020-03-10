@@ -7,3 +7,6 @@
 [submodule "Illithid/vendor/GLAD"]
 	path = Illithid/vendor/GLAD
 	url = https://github.com/fishingGrapes/glad.git
+[submodule "Illithid/vendor/glm"]
+	path = Illithid/vendor/glm
+	url = https://github.com/g-truc/glm.git

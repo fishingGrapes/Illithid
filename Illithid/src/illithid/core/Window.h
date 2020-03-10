@@ -26,7 +26,7 @@ namespace itd
 
 	class Window
 	{
-		using EventListener = std::function<void( Event& )>;
+		using EventListener = std::function<void( std::shared_ptr<Event> )>;
 
 	public:
 		explicit Window( const WindowProperties& props );
@@ -59,6 +59,11 @@ namespace itd
 		inline void SetEventListener( const EventListener& listener )
 		{
 			windowData_.Listener = listener;
+		}
+
+		inline void* GetRawWindow( ) const
+		{
+			return static_cast<void*>( window_ );
 		}
 
 	private:

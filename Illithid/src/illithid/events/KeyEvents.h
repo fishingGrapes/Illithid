@@ -27,7 +27,7 @@ namespace itd
 	class KeyPressedEvent : public KeyEvent
 	{
 	public:
-		explicit KeyPressedEvent( uint32_t keyCode ) : KeyEvent( keyCode ), repeatCount_( 0 )
+		explicit KeyPressedEvent( uint32_t keyCode, uint32_t repeatCount ) : KeyEvent( keyCode ), repeatCount_( repeatCount )
 		{
 
 		}
