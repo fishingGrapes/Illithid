@@ -19,5 +19,7 @@ namespace itd
 
 		clientLogger_ = spdlog::stdout_color_mt( "APP" );
 		clientLogger_->set_level( spdlog::level::trace );
+
+		IL_CORE_INFO( "Logger Initialized." );
 	}
 }

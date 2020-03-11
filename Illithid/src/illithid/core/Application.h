@@ -14,14 +14,12 @@ namespace itd
 		virtual ~Application( );
 
 		void Run( );
-		void OnEvent( std::shared_ptr<Event> event );
 
-
+	protected:
 		virtual void Start( ) = 0;
 		virtual void Shutdown( ) = 0;
-		virtual void Tick( double_t at, double_t dt ) = 0;
-		virtual void FixedTick( double_t dt ) = 0;
-		virtual void LateTick( double_t at, double_t dt ) = 0;
+
+		virtual void OnEvent( Event& event );
 
 	private:
 		void Initialize( );

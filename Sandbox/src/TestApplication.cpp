@@ -1,6 +1,13 @@
 #include "Illithid.h"
 #include "illithid/core/EntryPoint.h"
 
+using Event = itd::Event;
+using EventDispatcher = itd::EventDispatcher;
+using KeyPressedEvent = itd::KeyPressedEvent;
+using KeyReleasedEvent = itd::KeyReleasedEvent;
+using MouseButtonPressedEvent = itd::MouseButtonPressedEvent;
+using MouseButtonReleasedEvent = itd::MouseButtonReleasedEvent;
+
 class TestApplication : public itd::Application
 {
 public:
@@ -15,60 +22,26 @@ public:
 	// Inherited via Application
 	virtual void Start( ) override
 	{
-		//IL_TRACE( "Start" );
+		IL_TRACE( "Start" );
 	}
 
 	virtual void Shutdown( ) override
 	{
-		//IL_TRACE( "Shutdown" );
+		IL_TRACE( "Shutdown" );
 	}
 
-	virtual void Tick( double_t at, double_t dt ) override
+	virtual void OnEvent( Event& event ) override
 	{
-		//IL_TRACE( "Tick" );
+		Application::OnEvent( event );
 
+		EventDispatcher dispatcehr( event );
+		dispatcehr.Dispatch<KeyPressedEvent>( BIND_EVENT_FUNCTION( TestApplication::OnKeyPressed, this ) );
 	}
 
-	virtual void FixedTick( double_t dt ) override
+	bool OnKeyPressed( KeyPressedEvent& event )
 	{
-		//IL_TRACE( "FixedTick" );
-
-		if (itd::Input::IsKeyDown( itd::KeyCode::SPACE ))
-		{
-			IL_TRACE( "Space is down" );
-		}
-
-		if (itd::Input::IsKeyUp( itd::KeyCode::SPACE ))
-		{
-			IL_TRACE( "Space is up" );
-		}
-
-		if (itd::Input::IsKeyHeld( itd::KeyCode::SPACE ))
-		{
-			//IL_TRACE( "Space is Held" );
-		}
-
-		if (itd::Input::IsMouseButtonDown( 0 ))
-		{
-			IL_TRACE( "LMB is down" );
-		}
-
-		if (itd::Input::IsMouseButtonUp( 0 ))
-		{
-			IL_TRACE( "LMB is up" );
-		}
-
-		if (itd::Input::IsMouseButtonHeld( 0 ))
-		{
-			//IL_TRACE( "LMB is Held" );
-		}
-
-		IL_TRACE( "Mouse Position {0}", itd::Input::GetMouseScrollDelta( ) );
-	}
-
-	virtual void LateTick( double_t at, double_t dt ) override
-	{
-		//IL_TRACE( "LateTick" );
+		IL_TRACE( event );
+		return true;
 	}
 };
 

@@ -26,7 +26,7 @@ namespace itd
 
 	class Window
 	{
-		using EventListener = std::function<void( std::shared_ptr<Event> )>;
+		using EventListener = std::function<void( Event& )>;
 
 	public:
 		explicit Window( const WindowProperties& props );
@@ -51,10 +51,8 @@ namespace itd
 			return isVsync_;
 		}
 
-		inline void SetVsync( bool value )
-		{
-			isVsync_ = value;
-		}
+		void SetVsync( bool value );
+	
 
 		inline void SetEventListener( const EventListener& listener )
 		{
@@ -83,6 +81,6 @@ namespace itd
 		GLFWwindow* window_;
 
 		void Initialize( );
-		void Cleanup( );
+		void Destroy( );
 	};
 }
