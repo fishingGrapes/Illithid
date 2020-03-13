@@ -1,2 +1,2 @@
 # Illithid
-*placeholder*
+A simple OpenGL renderer for learning purposes.
