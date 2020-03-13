@@ -14,7 +14,23 @@ namespace itd
 
 	void StaticMesh::CreateVertexArrayObject( )
 	{
-		glGenVertexArrays( 1, &VAO_ );
+		glCreateVertexArrays( 1, &VAO_ );
+
+		glCreateBuffers( 1, &VBO_ );
+		glNamedBufferStorage( VBO_, sizeof( Vertex ) * vertices_.size( ), vertices_.data( ), 0 );
+
+		glVertexArrayVertexBuffer( VAO_, 0, VBO_, 0, sizeof( Vertex ) );
+
+		glEnableVertexArrayAttrib( VAO_, 0 );
+		glEnableVertexArrayAttrib( VAO_, 1 );
+
+		glVertexArrayAttribFormat( VAO_, 0, 3, GL_FLOAT, GL_FALSE, offsetof( Vertex, Position ) );
+		glVertexArrayAttribFormat( VAO_, 1, 4, GL_FLOAT, GL_FALSE, offsetof( Vertex, Color ) );
+
+		glVertexArrayAttribBinding( VAO_, 0, 0 );
+		glVertexArrayAttribBinding( VAO_, 1, 0 );
+
+		/*glGenVertexArrays( 1, &VAO_ );
 		glBindVertexArray( VAO_ );
 
 		glGenBuffers( 1, &VBO_ );
@@ -26,7 +42,7 @@ namespace itd
 		glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( Vertex ), (void*) offsetof( Vertex, Position ) );
 
 		glEnableVertexAttribArray( 1 );
-		glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, sizeof( Vertex ), (void*) offsetof( Vertex, Color ) );
+		glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, sizeof( Vertex ), (void*) offsetof( Vertex, Color ) );*/
 	}
 
 	void StaticMesh::Bind( ) const

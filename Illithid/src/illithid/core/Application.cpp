@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include "Log.h"
+#include "Time.h"
 #include "Window.h"
 #include "Macros.h"
 #include "FileSystem.h"
@@ -10,6 +11,7 @@
 
 namespace itd
 {
+	double_t Time::elapsed_ = 0.0;
 
 	Application::Application( ) :
 		isRunning_( true )
@@ -24,10 +26,18 @@ namespace itd
 
 	void Application::Run( )
 	{
+		using TimePoint = std::chrono::steady_clock::time_point;
+
+		TimePoint startTime = std::chrono::high_resolution_clock::now( );
+		TimePoint currentTime;
+
 		this->Start( );
 
 		while (isRunning_)
 		{
+			currentTime = std::chrono::high_resolution_clock::now( );
+			Time::elapsed_ = ( std::chrono::duration_cast<std::chrono::microseconds>( currentTime - startTime ).count( ) ) / 1000000.0;
+
 			Graphics::ClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
 			Graphics::Clear( GL_COLOR_BUFFER_BIT );
 
@@ -53,7 +63,7 @@ namespace itd
 
 		FileSystem::Initialize( );
 
-		window_ = std::make_unique<Window>( WindowProperties( ) );
+		window_ = std::make_unique<Window>( WindowProperties( "GL", 800, 800) );
 		window_->SetEventListener( BIND_EVENT_FUNCTION( Application::OnEvent, this ) );
 
 		Graphics::Initialize( window_ );

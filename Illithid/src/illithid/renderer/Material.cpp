@@ -3,12 +3,15 @@
 
 #include "illithid/core/Log.h"
 #include "glad/glad.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 namespace itd
 {
 	Material::Material( const Shader& shader )
 	{
 		this->CreateProgram( shader );
+		this->CacheUniforms( );
 	}
 
 	Material::~Material( )
@@ -18,12 +21,10 @@ namespace itd
 
 	void Material::CreateProgram( const Shader& shader )
 	{
-
-
 		const char* vertexSource = shader.VertexSource.c_str( );
 		const char* fragmentSource = shader.FragmentSource.c_str( );
 
-		uint32_t vertexShader, fragmentShader;
+		GLuint vertexShader, fragmentShader;
 
 		vertexShader = glCreateShader( GL_VERTEX_SHADER );
 		glShaderSource( vertexShader, 1, &vertexSource, nullptr );
@@ -42,8 +43,8 @@ namespace itd
 
 #if defined(IL_DEBUG) || defined(IL_RELEASE)
 
-		int32_t success;
-		char vInfoLog[ 512 ], fInfoLog[ 512 ], pInfoLog[ 512 ];
+		GLint success;
+		GLchar vInfoLog[ 512 ], fInfoLog[ 512 ], pInfoLog[ 512 ];
 
 		glGetShaderiv( vertexShader, GL_COMPILE_STATUS, &success );
 		if (!success)
@@ -72,8 +73,50 @@ namespace itd
 		glDeleteShader( fragmentShader );
 	}
 
+	void Material::CacheUniforms( )
+	{
+		GLint uniformCount = 0;
+		glGetProgramiv( program_, GL_ACTIVE_UNIFORMS, &uniformCount );
+
+		if (uniformCount > 0)
+		{
+			GLint maxNameLength = 0;
+			GLsizei length = 0;
+			GLsizei size = 0;
+			GLenum type = GL_NONE;
+
+			glGetProgramiv( program_, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength );
+			GLchar* uniformName = new GLchar[ maxNameLength ];
+
+			for (GLint i = 0; i < uniformCount; ++i)
+			{
+				glGetActiveUniform( program_, i, maxNameLength, &length, &size, &type, uniformName );
+
+				UniformData data;
+				data.Location = glGetUniformLocation( program_, uniformName );
+				data.Size = size;
+
+				uniformMap_.emplace( std::make_pair( std::string( uniformName, length ), data ) );
+			}
+
+			delete[ ] uniformName;
+		}
+	}
+
 	void Material::Use( )
 	{
 		glUseProgram( program_ );
+	}
+
+	void Material::SetFloat( const char* uniform, float_t value )
+	{
+		UniformData& data = uniformMap_[ uniform ];
+		glProgramUniform1f( program_, data.Location, value );
+	}
+
+	void Material::SetVector2f( const char* uniform, glm::vec2& value )
+	{
+		UniformData& data = uniformMap_[ uniform ];
+		glProgramUniform2fv( program_, data.Location, 1, glm::value_ptr( value ) );
 	}
 }

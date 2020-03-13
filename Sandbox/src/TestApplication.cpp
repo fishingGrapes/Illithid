@@ -7,6 +7,7 @@ using KeyPressedEvent = itd::KeyPressedEvent;
 using KeyReleasedEvent = itd::KeyReleasedEvent;
 using MouseButtonPressedEvent = itd::MouseButtonPressedEvent;
 using MouseButtonReleasedEvent = itd::MouseButtonReleasedEvent;
+using MouseMovedEvent = itd::MouseMovedEvent;
 
 using Graphics = itd::Graphics;
 using Shader = itd::Shader;
@@ -21,10 +22,13 @@ private:
 	std::unique_ptr<Material> material_;
 	std::unique_ptr < StaticMesh> mesh_;
 
-public:
-	TestApplication( )
-	{
+	glm::vec2 mousePosition_;
 
+public:
+
+	TestApplication( )
+		:mousePosition_( 0.0f )
+	{
 	}
 
 	~TestApplication( )
@@ -38,11 +42,16 @@ public:
 
 		Shader shader( "Assets/Shaders/basic.shader" );
 		material_ = std::make_unique<Material>( shader );
+		material_->SetVector2f( "u_Resolution", glm::vec2( 800, 800 ) );
+
 
 		std::vector<Vertex> vertices;
-		vertices.emplace_back( Vertex{ glm::vec3( -0.5f, -0.5f, 0.0f ), glm::vec4( 0.0f, 1.0f, 1.0f, 1.0f ) } );
-		vertices.emplace_back( Vertex{ glm::vec3( 0.5f, -0.5f, 0.0f ),  glm::vec4( 0.0f, 1.0f, 1.0f, 1.0f ) } );
-		vertices.emplace_back( Vertex{ glm::vec3( 0.0f, 0.5f, 0.0f ),  glm::vec4( 0.0f, 1.0f, 1.0f, 1.0f ) } );
+		vertices.emplace_back( Vertex{ glm::vec3( -1.0f, 1.0f, 0.0f ), glm::vec4( 0.0f, 1.0f, 1.0f, 1.0f ) } );
+		vertices.emplace_back( Vertex{ glm::vec3( -1.0f, -1.0f, 0.0f ),  glm::vec4( 0.0f, 1.0f, 1.0f, 1.0f ) } );
+		vertices.emplace_back( Vertex{ glm::vec3( 1.0f, -1.0f, 0.0f ),  glm::vec4( 0.0f, 1.0f, 1.0f, 1.0f ) } );
+		vertices.emplace_back( Vertex{ glm::vec3( 1.0f, -1.0f, 0.0f ),  glm::vec4( 0.0f, 1.0f, 1.0f, 1.0f ) } );
+		vertices.emplace_back( Vertex{ glm::vec3( 1.0f, 1.0f, 0.0f ), glm::vec4( 0.0f, 1.0f, 1.0f, 1.0f ) } );
+		vertices.emplace_back( Vertex{ glm::vec3( -1.0f, 1.0f, 0.0f ),  glm::vec4( 0.0f, 1.0f, 1.0f, 1.0f ) } );
 
 		mesh_ = std::make_unique<StaticMesh>( std::move( vertices ) );
 	}
@@ -56,19 +65,24 @@ public:
 	{
 		Application::OnEvent( event );
 
-		EventDispatcher dispatcehr( event );
-		dispatcehr.Dispatch<KeyPressedEvent>( BIND_EVENT_FUNCTION( TestApplication::OnKeyPressed, this ) );
+		EventDispatcher dispatcher( event );
+		dispatcher.Dispatch<MouseMovedEvent>( [ this ] ( MouseMovedEvent& evnt ) -> bool
+		{
+			mousePosition_.x = evnt.X( );
+			mousePosition_.y = evnt.Y( );
+
+			return false;
+		} );
 	}
 
-	bool OnKeyPressed( KeyPressedEvent& event )
-	{
-		IL_TRACE( event );
-		return true;
-	}
+
 
 	// Inherited via Application
 	virtual void Render( ) override
 	{
+		//material_->SetFloat( "u_Time", static_cast<float_t>( itd::Time::Elapsed( ) ) );
+		//material_->SetVector2f( "u_Mouse", mousePosition_ );
+
 		Graphics::DrawMesh( *mesh_, *material_ );
 	}
 };
