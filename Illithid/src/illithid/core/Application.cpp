@@ -4,6 +4,7 @@
 #include "Log.h"
 #include "Window.h"
 #include "Macros.h"
+#include "FileSystem.h"
 #include "illithid/renderer/Graphics.h"
 #include "glad/glad.h"
 
@@ -27,8 +28,10 @@ namespace itd
 
 		while (isRunning_)
 		{
-			Graphics::ClearColor( 1.0f, 1.0f, 0.0f, 1.0f );
+			Graphics::ClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
 			Graphics::Clear( GL_COLOR_BUFFER_BIT );
+
+			this->Render( );
 
 			window_->SwapBuffers( );
 			window_->PollEvents( );
@@ -48,6 +51,8 @@ namespace itd
 		//Change this to take a log-level
 		Log::Initialize( );
 
+		FileSystem::Initialize( );
+
 		window_ = std::make_unique<Window>( WindowProperties( ) );
 		window_->SetEventListener( BIND_EVENT_FUNCTION( Application::OnEvent, this ) );
 
@@ -56,7 +61,6 @@ namespace itd
 
 	void Application::Destroy( )
 	{
-		Graphics::Destroy( );
 	}
 
 	bool Application::OnWindowClosed( WindowClosedEvent& event )

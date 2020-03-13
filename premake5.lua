@@ -23,6 +23,7 @@ IncludeDir["spdlog"] = "Illithid/vendor/spdlog/include"
 IncludeDir["GLFW"] = "Illithid/vendor/GLFW/include"
 IncludeDir["GLAD"] = "Illithid/vendor/GLAD/include"
 IncludeDir["glm"] = "Illithid/vendor/glm"
+IncludeDir["json"] = "Illithid/vendor/json/single_include"
 
 
 group "dependencies"
@@ -58,7 +59,8 @@ project "Illithid"
 		"%{IncludeDir.spdlog}",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.GLAD}",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.json}"
 	}
 
 	links
@@ -115,7 +117,8 @@ project "Sandbox"
 	{
 		"Illithid/src",
 		"%{IncludeDir.spdlog}",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.json}"
 	}
 
 	links { "Illithid" }

@@ -10,3 +10,6 @@
 [submodule "Illithid/vendor/glm"]
 	path = Illithid/vendor/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "Illithid/vendor/json"]
+	path = Illithid/vendor/json
+	url = https://github.com/nlohmann/json.git
