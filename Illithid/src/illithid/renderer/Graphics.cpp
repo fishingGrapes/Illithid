@@ -46,7 +46,7 @@ namespace itd
 		material.Use( );
 		mesh.Bind( );
 
-		glDrawArrays( GL_TRIANGLES, 0, static_cast<GLsizei>( mesh.VertexCount( ) ) );
+		glDrawElements( GL_TRIANGLES, static_cast<GLsizei>( mesh.ElementCount( ) ), GL_UNSIGNED_INT, nullptr );
 	}
 
 

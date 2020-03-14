@@ -24,6 +24,7 @@ IncludeDir["GLFW"] = "Illithid/vendor/GLFW/include"
 IncludeDir["GLAD"] = "Illithid/vendor/GLAD/include"
 IncludeDir["glm"] = "Illithid/vendor/glm"
 IncludeDir["json"] = "Illithid/vendor/json/single_include"
+IncludeDir["stb"] = "Illithid/vendor/stb"
 
 
 group "dependencies"
@@ -60,7 +61,8 @@ project "Illithid"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.GLAD}",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.json}"
+		"%{IncludeDir.json}",
+		"%{IncludeDir.stb}"
 	}
 
 	links

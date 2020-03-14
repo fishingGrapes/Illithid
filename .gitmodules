@@ -13,3 +13,6 @@
 [submodule "Illithid/vendor/json"]
 	path = Illithid/vendor/json
 	url = https://github.com/nlohmann/json.git
+[submodule "Illithid/vendor/stb"]
+	path = Illithid/vendor/stb
+	url = https://github.com/nothings/stb.git

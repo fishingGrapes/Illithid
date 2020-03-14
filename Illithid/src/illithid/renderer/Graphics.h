@@ -3,6 +3,7 @@
 
 #include "StaticMesh.h"
 #include "Material.h"
+#include "Texture2D.h"
 
 namespace itd
 {

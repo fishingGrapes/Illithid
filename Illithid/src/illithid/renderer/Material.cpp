@@ -73,6 +73,7 @@ namespace itd
 		glDeleteShader( fragmentShader );
 	}
 
+	//TODO: Parse sampler2D and assign the respective textures
 	void Material::CacheUniforms( )
 	{
 		GLint uniformCount = 0;

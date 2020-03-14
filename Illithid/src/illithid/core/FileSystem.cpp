@@ -20,16 +20,8 @@ namespace itd
 
 	std::string FileSystem::LoadAsText( const std::string& path )
 	{
-
-		std::string qualifiedPath = BaseDirectory_ + path;
 		std::string text;
-
-		size_t position;
-		while (( position = qualifiedPath.find( DefaultSeparator_ ) ) != std::string::npos)
-		{
-			qualifiedPath.replace( position, 1, DirectorySeparator_ );
-		}
-
+		std::string qualifiedPath = GetAbsolutePath( path );
 
 		if (std::filesystem::exists( qualifiedPath ))
 		{
@@ -55,5 +47,19 @@ namespace itd
 
 		return text;
 	}
+
+	std::string FileSystem::GetAbsolutePath( const std::string& relativePath )
+	{
+		std::string qualifiedPath = BaseDirectory_ + relativePath;
+
+		size_t position;
+		while (( position = qualifiedPath.find( DefaultSeparator_ ) ) != std::string::npos)
+		{
+			qualifiedPath.replace( position, 1, DirectorySeparator_ );
+		}
+
+		return qualifiedPath;
+	}
+
 
 }
