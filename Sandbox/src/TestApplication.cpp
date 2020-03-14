@@ -22,7 +22,7 @@ class TestApplication : public itd::Application
 private:
 	std::unique_ptr<Material> material_;
 	std::unique_ptr<StaticMesh> mesh_;
-	std::unique_ptr<Texture2D> texture_;
+	std::shared_ptr<Texture2D> texture_;
 
 	glm::vec2 mousePosition_;
 
@@ -54,7 +54,7 @@ public:
 		std::vector<uint32_t> indices = { 0, 1, 2, 2, 3, 0 };
 
 		mesh_ = std::make_unique<StaticMesh>( std::move( vertices ), std::move( indices ) );
-		texture_ = Texture2D::Load( "Assets/Textures/brick_wall.jpg" );
+		texture_ = Texture2D::Load( "Assets/Textures/brick_wall.tex2D" );
 	}
 
 	virtual void Shutdown( ) override
