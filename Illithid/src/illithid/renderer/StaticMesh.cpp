@@ -12,6 +12,13 @@ namespace itd
 		this->CreateVertexArrayObject( );
 	}
 
+	StaticMesh::~StaticMesh( )
+	{
+		glDeleteBuffers( 1, &VBO_ );
+		glDeleteBuffers( 1, &EBO_ );
+		glDeleteVertexArrays( 1, &VAO_ );
+	}
+
 	void StaticMesh::CreateVertexArrayObject( )
 	{
 

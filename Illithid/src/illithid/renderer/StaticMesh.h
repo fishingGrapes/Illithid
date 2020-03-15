@@ -9,6 +9,7 @@ namespace itd
 	{
 	public:
 		explicit StaticMesh( std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices );
+		~StaticMesh( );
 
 		void Bind( ) const;
 

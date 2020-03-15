@@ -8,10 +8,10 @@ namespace itd
 {
 	Shader::Shader( const std::string& path )
 	{
-		std::string shader = FileSystem::LoadAsText( path );
+		std::string shader = FileSystem::ReadAsText( path );
 		nlohmann::json shaderObject = nlohmann::json::parse( shader );
 
-		VertexSource = FileSystem::LoadAsText( shaderObject[ "vertex" ] );
-		FragmentSource = FileSystem::LoadAsText( shaderObject[ "fragment" ] );
+		VertexSource = FileSystem::ReadAsText( shaderObject[ "vertex" ] );
+		FragmentSource = FileSystem::ReadAsText( shaderObject[ "fragment" ] );
 	}
 }

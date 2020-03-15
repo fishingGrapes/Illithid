@@ -18,7 +18,7 @@ namespace itd
 	}
 
 
-	std::string FileSystem::LoadAsText( const std::string& path )
+	std::string FileSystem::ReadAsText( const std::string& path )
 	{
 		std::string text;
 		std::string qualifiedPath = GetAbsolutePath( path );
