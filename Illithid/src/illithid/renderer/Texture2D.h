@@ -21,7 +21,7 @@ namespace itd
 		void SetPixelFormat( PixelFormat format );
 		void SetPixelData( const unsigned char* data );
 
-		void Bind( ) const;
+		void BindToTextureUnit( uint32_t unit) const;
 
 	private:
 		uint32_t id_;

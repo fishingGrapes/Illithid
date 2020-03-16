@@ -70,9 +70,9 @@ namespace itd
 		glTextureSubImage2D( id_, 0, 0, 0, width_, height_, pixelFormat_, GL_UNSIGNED_BYTE, data );
 	}
 
-	void Texture2D::Bind( ) const
+	void Texture2D::BindToTextureUnit( uint32_t unit ) const
 	{
-		glBindTextureUnit( 0, id_ );
+		glBindTextureUnit( unit, id_ );
 	}
 
 	std::shared_ptr<Texture2D> Texture2D::Load( const std::string& path )

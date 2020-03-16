@@ -6,6 +6,8 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include "Texture2D.h"
+
 namespace itd
 {
 	Material::Material( const Shader& shader )
@@ -104,9 +106,39 @@ namespace itd
 		}
 	}
 
+	//TODO: implement code to re-assign textures for the same uniform.
+	void Material::SetTexture( const std::string& uniform, std::shared_ptr<Texture2D> texture )
+	{
+		if (textureMap_.find( uniform ) == textureMap_.end( ))
+		{
+			int32_t unit = static_cast<int32_t>( textureMap_.size( ) );
+			textureMap_[ uniform ] = TextureData{ texture , unit };
+
+			UniformData& data = uniformMap_[ uniform ];
+			glProgramUniform1i( program_, data.Location, unit );
+
+			return;
+		}
+
+		TextureData& data = textureMap_[ uniform ];
+		data.Texture = texture;
+	}
+
 	void Material::Use( )
 	{
+		uint32_t textureUnit = 0;
+		for (auto& element : textureMap_)
+		{
+			element.second.Texture->BindToTextureUnit( textureUnit++ );
+		}
+
 		glUseProgram( program_ );
+	}
+
+	void Material::SetInt( const char* uniform, int32_t value )
+	{
+		UniformData& data = uniformMap_[ uniform ];
+		glProgramUniform1i( program_, data.Location, value );
 	}
 
 	void Material::SetFloat( const char* uniform, float_t value )

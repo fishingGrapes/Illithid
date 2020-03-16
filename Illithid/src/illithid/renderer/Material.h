@@ -4,6 +4,7 @@
 
 namespace itd
 {
+	class Texture2D;
 	class Material
 	{
 
@@ -15,7 +16,10 @@ namespace itd
 		Material( const Material& other ) = delete;
 		Material& operator=( const Material& other ) = delete;
 
+		void SetTexture( const std::string& uniform, std::shared_ptr<Texture2D> texture );
+
 		void Use( );
+		void SetInt( const char* uniform, int32_t value );
 		void SetFloat( const char* uniform, float_t value );
 		void SetVector2f( const char* uniform, glm::vec2& value );
 
@@ -27,8 +31,18 @@ namespace itd
 			uint32_t Size;
 		};
 
+		struct TextureData
+		{
+		public:
+			std::shared_ptr<Texture2D> Texture;
+			int32_t Unit;
+		};
+
 		using UniformMap = std::unordered_map<std::string, UniformData>;
 		UniformMap uniformMap_;
+
+		using TextureMap = std::unordered_map<std::string, TextureData>;
+		TextureMap textureMap_;
 
 		uint32_t program_;
 

@@ -22,7 +22,7 @@ class TestApplication : public itd::Application
 private:
 	std::unique_ptr<Material> material_;
 	std::unique_ptr<StaticMesh> mesh_;
-	std::shared_ptr<Texture2D> texture_;
+	std::shared_ptr<Texture2D> wallTexture_, smileTexture_, containerTexture_;
 
 	glm::vec2 mousePosition_;
 
@@ -40,9 +40,15 @@ public:
 	// Inherited via Application
 	virtual void Start( ) override
 	{
+		wallTexture_ = Texture2D::Load( "Assets/Textures/brick_wall.tex2D" );
+		smileTexture_ = Texture2D::Load( "Assets/Textures/smiley_face.tex2D" );
+		containerTexture_ = Texture2D::Load( "Assets/Textures/container.tex2D" );
+
 		Shader shader( "Assets/Shaders/basic.shader" );
 		material_ = std::make_unique<Material>( shader );
 		//material_->SetVector2f( "u_Resolution", glm::vec2( 800, 800 ) );
+		material_->SetTexture( "u_BrickWall", wallTexture_ );
+		material_->SetTexture( "u_SmileyFace", smileTexture_ );
 
 
 		std::vector<Vertex> vertices;
@@ -54,7 +60,6 @@ public:
 		std::vector<uint32_t> indices = { 0, 1, 2, 2, 3, 0 };
 
 		mesh_ = std::make_unique<StaticMesh>( std::move( vertices ), std::move( indices ) );
-		texture_ = Texture2D::Load( "Assets/Textures/brick_wall.tex2D" );
 	}
 
 	virtual void Shutdown( ) override
@@ -74,6 +79,16 @@ public:
 
 			return false;
 		} );
+
+		dispatcher.Dispatch<KeyReleasedEvent>( [ this ] ( KeyReleasedEvent& evnt )-> bool
+		{
+			if (evnt.KeyCode( ) == itd::KeyCode::SPACE)
+			{
+				material_->SetTexture( "u_BrickWall", containerTexture_ );
+			}
+
+			return false;
+		} );
 	}
 
 
@@ -84,7 +99,6 @@ public:
 		//material_->SetFloat( "u_Time", static_cast<float_t>( itd::Time::Elapsed( ) ) );
 		//material_->SetVector2f( "u_Mouse", mousePosition_ );
 
-		texture_->Bind( );
 		Graphics::DrawMesh( *mesh_, *material_ );
 	}
 };
