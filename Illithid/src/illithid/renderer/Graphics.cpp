@@ -31,7 +31,7 @@ namespace itd
 #endif
 	}
 
-	void Graphics::Clear( uint32_t bits )
+	void Graphics::Clear( int32_t bits )
 	{
 		glClear( bits );
 	}
@@ -41,12 +41,28 @@ namespace itd
 		glClearColor( r, g, b, a );
 	}
 
+	void Graphics::EnableCapabality( int32_t capability )
+	{
+		glEnable( capability );
+	}
+
+	void Graphics::DisableCapabality( int32_t capability )
+	{
+		glDisable( capability );
+	}
+
+	void Graphics::SetPolygonMode( PolygonFace face, PolygonMode mode )
+	{
+		glPolygonMode( face, mode );
+	}
+
 	void Graphics::DrawMesh( StaticMesh& mesh, Material& material )
 	{
 		material.Use( );
 		mesh.Bind( );
 
-		glDrawElements( GL_TRIANGLES, static_cast<GLsizei>( mesh.ElementCount( ) ), GL_UNSIGNED_INT, nullptr );
+		//glDrawElements( GL_TRIANGLES, static_cast<GLsizei>( mesh.ElementCount( ) ), GL_UNSIGNED_INT, nullptr );
+		glDrawArrays( GL_TRIANGLES, 0, static_cast<GLsizei>( mesh.VertexCount( ) ) );
 	}
 
 

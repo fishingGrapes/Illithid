@@ -2,6 +2,9 @@
 
 namespace itd
 {
+
+#ifdef IL_OPENGL_BACKEND
+
 	enum TextureWrapMode : int32_t
 	{
 		WM_INVALID = -1,
@@ -39,4 +42,8 @@ namespace itd
 		PF_RGB = 0x1907,	//GL_RGB
 		PF_RGBA = 0x1908	//GL_RGBA
 	};
+
+#else 
+#error Illithid currently supports only OpenGL.
+#endif
 }

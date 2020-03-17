@@ -1,9 +1,10 @@
 #pragma once
+#include "glm/fwd.hpp"
 
 namespace glm
 {
-	inline std::ostream& operator<< ( std::ostream& os, const vec2& evnt )
-	{
-		return os << "(" << evnt.x << ",  " << evnt.y << ")";
-	}
+	std::ostream& operator<< ( std::ostream& os, const vec2& obj );
+	std::ostream& operator<< ( std::ostream& os, const vec3& obj );
+
+	std::ostream& operator<< ( std::ostream& os, const quat& obj );
 }

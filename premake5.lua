@@ -25,6 +25,7 @@ IncludeDir["GLAD"] = "Illithid/vendor/GLAD/include"
 IncludeDir["glm"] = "Illithid/vendor/glm"
 IncludeDir["json"] = "Illithid/vendor/json/single_include"
 IncludeDir["stb"] = "Illithid/vendor/stb"
+IncludeDir["tinyobjloader"] = "Illithid/vendor/tinyobjloader"
 
 
 group "dependencies"
@@ -62,7 +63,8 @@ project "Illithid"
 		"%{IncludeDir.GLAD}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.json}",
-		"%{IncludeDir.stb}"
+		"%{IncludeDir.stb}",
+		"%{IncludeDir.tinyobjloader}"
 	}
 
 	links
@@ -78,7 +80,7 @@ project "Illithid"
 
 			defines
 			{
-				"IL_PLATFORM_WINDOWS"
+				"IL_PLATFORM_WINDOWS", "IL_OPENGL_BACKEND"
 			}
 
 	filter "configurations:Debug"
@@ -131,7 +133,7 @@ project "Sandbox"
 
 			defines
 			{
-				"IL_PLATFORM_WINDOWS"
+				"IL_PLATFORM_WINDOWS", "IL_OPENGL_BACKEND"
 			}
 
 

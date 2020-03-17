@@ -8,7 +8,7 @@ namespace itd
 	class StaticMesh
 	{
 	public:
-		explicit StaticMesh( std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices );
+		explicit StaticMesh( std::vector<Vertex>&& vertices );
 		~StaticMesh( );
 
 		void Bind( ) const;
@@ -18,20 +18,15 @@ namespace itd
 			return  vertices_.size( );
 		}
 
-		inline size_t ElementCount( ) const
-		{
-			return  indices_.size( );
-		}
-
-		StaticMesh( ) = delete;
+		StaticMesh( ) = default;
 		StaticMesh( const StaticMesh& other ) = delete;
 		StaticMesh& operator=( const StaticMesh& other ) = delete;
 
-	private:
-		uint32_t VAO_, VBO_, EBO_;
+		static std::shared_ptr<StaticMesh> Load( const std::string& path );
 
+	private:
+		uint32_t VAO_, VBO_;
 		const std::vector<Vertex> vertices_;
-		const std::vector<uint32_t> indices_;
 
 		void CreateVertexArrayObject( );
 	};

@@ -118,7 +118,7 @@ namespace itd
 		}
 
 		std::string texturePath = textureObject[ "path" ];
-		int32_t width, height, channels;
+		int32_t width = 0, height = 0, channels = 0;
 		unsigned char* data = stbi_load( texturePath.c_str( ), &width, &height, &channels, desiredChannels );
 
 		PixelFormat pixelFormat = PixelFormat::PF_INVALID;

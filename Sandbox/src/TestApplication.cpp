@@ -16,20 +16,24 @@ using Vertex = itd::Vertex;
 using Material = itd::Material;
 using Texture2D = itd::Texture2D;
 
+using Transform = itd::Transform;
+
 class TestApplication : public itd::Application
 {
 
 private:
 	std::unique_ptr<Material> material_;
-	std::unique_ptr<StaticMesh> mesh_;
-	std::shared_ptr<Texture2D> wallTexture_, smileTexture_, containerTexture_;
+	std::shared_ptr<StaticMesh> mesh_;
+	std::shared_ptr<Texture2D> containerTexture_;
 
 	glm::vec2 mousePosition_;
+	Transform transform_;
+	double_t rotation_;
 
 public:
 
 	TestApplication( )
-		:mousePosition_( 0.0f )
+		:mousePosition_( 0.0f ), rotation_( 0.0 )
 	{
 	}
 
@@ -40,26 +44,15 @@ public:
 	// Inherited via Application
 	virtual void Start( ) override
 	{
-		wallTexture_ = Texture2D::Load( "Assets/Textures/brick_wall.tex2D" );
-		smileTexture_ = Texture2D::Load( "Assets/Textures/smiley_face.tex2D" );
-		containerTexture_ = Texture2D::Load( "Assets/Textures/container.tex2D" );
+		containerTexture_ = Texture2D::Load( "Assets/Textures/box.tex2D" );
 
 		Shader shader( "Assets/Shaders/basic.shader" );
 		material_ = std::make_unique<Material>( shader );
-		//material_->SetVector2f( "u_Resolution", glm::vec2( 800, 800 ) );
-		material_->SetTexture( "u_BrickWall", wallTexture_ );
-		material_->SetTexture( "u_SmileyFace", smileTexture_ );
+		material_->SetTexture( "u_BrickWall", containerTexture_ );
 
 
-		std::vector<Vertex> vertices;
-		vertices.emplace_back( Vertex{ glm::vec3( -1.0f, 1.0f, 0.0f ), glm::vec4( 1.0f ), glm::vec2( 0.0f, 1.0f ) } );
-		vertices.emplace_back( Vertex{ glm::vec3( -1.0f, -1.0f, 0.0f ),  glm::vec4( 1.0f ), glm::vec2( 0.0f, 0.0f ) } );
-		vertices.emplace_back( Vertex{ glm::vec3( 1.0f, -1.0f, 0.0f ),  glm::vec4( 1.0f ), glm::vec2( 1.0f, 0.0f ) } );
-		vertices.emplace_back( Vertex{ glm::vec3( 1.0f, 1.0f, 0.0f ), glm::vec4( 1.0f ), glm::vec2( 1.0f, 1.0f ) } );
-
-		std::vector<uint32_t> indices = { 0, 1, 2, 2, 3, 0 };
-
-		mesh_ = std::make_unique<StaticMesh>( std::move( vertices ), std::move( indices ) );
+		mesh_ = StaticMesh::Load( "Assets/Models/box.obj" );
+		Graphics::SetPolygonMode( itd::PolygonFace::PF_FrontAndBack, itd::PolygonMode::PM_Fill );
 	}
 
 	virtual void Shutdown( ) override
@@ -80,11 +73,33 @@ public:
 			return false;
 		} );
 
-		dispatcher.Dispatch<KeyReleasedEvent>( [ this ] ( KeyReleasedEvent& evnt )-> bool
+		dispatcher.Dispatch<KeyPressedEvent>( [ this ] ( KeyPressedEvent& evnt )-> bool
 		{
-			if (evnt.KeyCode( ) == itd::KeyCode::SPACE)
+			switch (evnt.KeyCode( ))
 			{
-				material_->SetTexture( "u_BrickWall", containerTexture_ );
+				case itd::KeyCode::W:
+					{
+						transform_.Translate( glm::vec3( 0.0f, 0.0f, -0.01f ) );
+						break;
+					}
+
+				case itd::KeyCode::S:
+					{
+						transform_.Translate( glm::vec3( 0.0f, 0.0f, 0.01f ) );
+						break;
+					}
+
+				case itd::KeyCode::A:
+					{
+						transform_.Translate( glm::vec3( 0.05f, 0.0f, 0.0f ) );
+						break;
+					}
+
+				case itd::KeyCode::D:
+					{
+						transform_.Translate( glm::vec3( -0.05f, 0.0f, 0.0f ) );
+						break;
+					}
 			}
 
 			return false;
@@ -92,13 +107,13 @@ public:
 	}
 
 
-
 	// Inherited via Application
 	virtual void Render( ) override
 	{
-		//material_->SetFloat( "u_Time", static_cast<float_t>( itd::Time::Elapsed( ) ) );
-		//material_->SetVector2f( "u_Mouse", mousePosition_ );
+		transform_.Rotate( glm::vec3( 0.0025f, 0.005f, 0.0f ) );
 
+		transform_.Update( );
+		material_->SetMatrix4f( "u_Model", transform_.TRS( ) );
 		Graphics::DrawMesh( *mesh_, *material_ );
 	}
 };

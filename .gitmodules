@@ -16,3 +16,6 @@
 [submodule "Illithid/vendor/stb"]
 	path = Illithid/vendor/stb
 	url = https://github.com/nothings/stb.git
+[submodule "Illithid/vendor/tinyobjloader"]
+	path = Illithid/vendor/tinyobjloader
+	url = https://github.com/tinyobjloader/tinyobjloader.git

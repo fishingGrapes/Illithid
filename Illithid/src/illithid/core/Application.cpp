@@ -7,7 +7,6 @@
 #include "Macros.h"
 #include "FileSystem.h"
 #include "illithid/renderer/Graphics.h"
-#include "glad/glad.h"
 
 namespace itd
 {
@@ -32,14 +31,16 @@ namespace itd
 		TimePoint currentTime;
 
 		this->Start( );
+		Graphics::EnableCapabality( Capability::Cap_DepthTest );
 
 		while (isRunning_)
 		{
 			currentTime = std::chrono::high_resolution_clock::now( );
 			Time::elapsed_ = ( std::chrono::duration_cast<std::chrono::microseconds>( currentTime - startTime ).count( ) ) / 1000000.0;
 
-			Graphics::ClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
-			Graphics::Clear( GL_COLOR_BUFFER_BIT );
+
+			Graphics::ClearColor( 0.0f, 0.5f, 0.5f, 1.0f );
+			Graphics::Clear( BufferBit::BB_Color | BufferBit::BB_Depth );
 
 			this->Render( );
 
@@ -63,7 +64,7 @@ namespace itd
 
 		FileSystem::Initialize( );
 
-		window_ = std::make_unique<Window>( WindowProperties( "GL", 800, 800) );
+		window_ = std::make_unique<Window>( WindowProperties( "GL", 800, 800 ) );
 		window_->SetEventListener( BIND_EVENT_FUNCTION( Application::OnEvent, this ) );
 
 		Graphics::Initialize( window_ );

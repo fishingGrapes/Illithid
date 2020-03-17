@@ -1,8 +1,0 @@
-{
-	"path" : "Assets/Raw/Textures/container.jpg",
-	"wrap_mode_s" : "repeat",
-	"wrap_mode_t" : "repeat",
-	"min_filter_mode" : "linear_mipmap_linear",
-	"mag_filter_mode" : "linear",
-	"texture_format" : "RGB8"
-}

@@ -9,7 +9,10 @@
 #include "illithid/events/KeyEvents.h"
 #include "illithid/events/MouseEvents.h"
 
+#include "illithid/scene/Transform.h"
+
 #include "glm/glm.hpp"
+#include "glm/gtc/quaternion.hpp"
 #include "nlohmann/json.hpp"
 
 #include "illithid/renderer/Graphics.h"

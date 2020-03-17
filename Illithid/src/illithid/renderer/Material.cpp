@@ -152,4 +152,10 @@ namespace itd
 		UniformData& data = uniformMap_[ uniform ];
 		glProgramUniform2fv( program_, data.Location, 1, glm::value_ptr( value ) );
 	}
+
+	void Material::SetMatrix4f( const char* uniform, glm::mat4& value )
+	{
+		UniformData& data = uniformMap_[ uniform ];
+		glProgramUniformMatrix4fv( program_, data.Location, 1, GL_FALSE, glm::value_ptr( value ) );
+	}
 }

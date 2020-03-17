@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 
+#include "RendererConstants.h"
 #include "StaticMesh.h"
 #include "Material.h"
 #include "Texture2D.h"
@@ -13,8 +14,13 @@ namespace itd
 	public:
 		static void Initialize( std::unique_ptr<Window>& window );
 
-		static void Clear( uint32_t bits );
+		static void Clear( int32_t bits );
 		static void ClearColor( float_t r, float_t g, float_t b, float_t a );
+
+		static void EnableCapabality( int32_t capability );
+		static void DisableCapabality( int32_t capability );
+
+		static void SetPolygonMode(PolygonFace face, PolygonMode mode );
 
 		static void DrawMesh( StaticMesh& mesh, Material& material );
 
