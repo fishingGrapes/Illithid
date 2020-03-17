@@ -34,7 +34,8 @@
 #Directories
 .vs/
 binaries/
-Sandbox/Assets
+Sandbox/Assets/Raw
+Sandbox/Assets/Models
 
 #Files
 *.user
