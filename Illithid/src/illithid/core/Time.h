@@ -8,12 +8,19 @@ namespace itd
 		friend class Application;
 
 	public:
-		inline static double_t Elapsed( )
+		inline static float_t Elapsed( )
 		{
 			return elapsed_;
+
+		}
+		inline static float_t Delta( )
+		{
+			return delta_;
 		}
 
 	private:
-		static double_t elapsed_;
+		static float_t elapsed_;
+		static float_t delta_;
+
 	};
 }

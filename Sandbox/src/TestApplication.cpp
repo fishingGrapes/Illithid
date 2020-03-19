@@ -1,6 +1,10 @@
 #include "Illithid.h"
 #include "illithid/core/EntryPoint.h"
 
+using Screen = itd::Screen;
+using Time = itd::Time;
+using Input = itd::Input;
+
 using Event = itd::Event;
 using EventDispatcher = itd::EventDispatcher;
 using KeyPressedEvent = itd::KeyPressedEvent;
@@ -17,6 +21,9 @@ using Material = itd::Material;
 using Texture2D = itd::Texture2D;
 
 using Transform = itd::Transform;
+using Camera = itd::Camera;
+using PerspectiveProjection = itd::PerspectiveProjection;
+using OrthographicProjection = itd::OrthographicProjection;
 
 class TestApplication : public itd::Application
 {
@@ -24,16 +31,18 @@ class TestApplication : public itd::Application
 private:
 	std::unique_ptr<Material> material_;
 	std::shared_ptr<StaticMesh> mesh_;
-	std::shared_ptr<Texture2D> containerTexture_;
+	std::shared_ptr<Texture2D> boxTexture_;
 
 	glm::vec2 mousePosition_;
-	Transform transform_;
-	double_t rotation_;
+	glm::vec3 rotation_;
+
+	Transform camTransform_, meshTransform_;
+	Camera camera_;
 
 public:
 
 	TestApplication( )
-		:mousePosition_( 0.0f ), rotation_( 0.0 )
+		:mousePosition_( 0.0f ), rotation_( glm::vec3( 0.0 ) )
 	{
 	}
 
@@ -44,15 +53,19 @@ public:
 	// Inherited via Application
 	virtual void Start( ) override
 	{
-		containerTexture_ = Texture2D::Load( "Assets/Textures/box.tex2D" );
+		boxTexture_ = Texture2D::Load( "Assets/Textures/box.tex2D" );
 
 		Shader shader( "Assets/Shaders/basic.shader" );
 		material_ = std::make_unique<Material>( shader );
-		material_->SetTexture( "u_BrickWall", containerTexture_ );
-
+		material_->SetTexture( "u_BrickWall", boxTexture_ );
 
 		mesh_ = StaticMesh::Load( "Assets/Models/box.obj" );
-		Graphics::SetPolygonMode( itd::PolygonFace::PF_FrontAndBack, itd::PolygonMode::PM_Fill );
+		Graphics::SetPolygonMode( itd::PolygonFace::PF_Front, itd::PolygonMode::PM_Fill );
+
+		camera_.SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
+		camTransform_.Translate( glm::vec3( 0.0f, 0.0f, 1.0f ) );
+
+		mousePosition_ = glm::vec2( Screen::Width( ) * 0.5f, Screen::Height( ) * 0.5f );
 	}
 
 	virtual void Shutdown( ) override
@@ -67,53 +80,66 @@ public:
 		EventDispatcher dispatcher( event );
 		dispatcher.Dispatch<MouseMovedEvent>( [ this ] ( MouseMovedEvent& evnt ) -> bool
 		{
+			float_t deltaX = mousePosition_.x - evnt.X( );
+			float_t deltaY = mousePosition_.y - evnt.Y( );
+
 			mousePosition_.x = evnt.X( );
 			mousePosition_.y = evnt.Y( );
 
-			return false;
-		} );
+			deltaX *= Time::Delta( ) * 0.45f;
+			deltaY *= Time::Delta( ) * 0.45f;
 
-		dispatcher.Dispatch<KeyPressedEvent>( [ this ] ( KeyPressedEvent& evnt )-> bool
-		{
-			switch (evnt.KeyCode( ))
+			rotation_.x += deltaX;
+			rotation_.y += deltaY;
+
+			if (glm::abs( glm::degrees( rotation_.y ) ) > 90.0f)
 			{
-				case itd::KeyCode::W:
-					{
-						transform_.Translate( glm::vec3( 0.0f, 0.0f, -0.01f ) );
-						break;
-					}
-
-				case itd::KeyCode::S:
-					{
-						transform_.Translate( glm::vec3( 0.0f, 0.0f, 0.01f ) );
-						break;
-					}
-
-				case itd::KeyCode::A:
-					{
-						transform_.Translate( glm::vec3( 0.05f, 0.0f, 0.0f ) );
-						break;
-					}
-
-				case itd::KeyCode::D:
-					{
-						transform_.Translate( glm::vec3( -0.05f, 0.0f, 0.0f ) );
-						break;
-					}
+				deltaY = 0.0f;
+				rotation_.y -= deltaY;
 			}
+			IL_TRACE( glm::abs( glm::degrees( rotation_.y ) ) );
+			camTransform_.Rotate( glm::vec3( deltaY, deltaX, 0.0f ), itd::TransformationSpace::Camera );
 
 			return false;
 		} );
+	}
+
+	void MoveCamera( )
+	{
+		if (Input::IsKeyDown( itd::KeyCode::W ) || Input::IsKeyHeld( itd::KeyCode::W ))
+		{
+			camTransform_.Translate( Time::Delta( ) * camTransform_.Forward( ) * glm::vec3( 1.0f, 1.0f, -1.0f ) );
+		}
+
+		if (Input::IsKeyDown( itd::KeyCode::S ) || Input::IsKeyHeld( itd::KeyCode::S ))
+		{
+			camTransform_.Translate( Time::Delta( ) * camTransform_.Forward( ) * glm::vec3( -1.0f, -1.0f, 1.0f ) );
+		}
+
+		if (Input::IsKeyDown( itd::KeyCode::A ) || Input::IsKeyHeld( itd::KeyCode::A ))
+		{
+			camTransform_.Translate( Time::Delta( ) * camTransform_.Right( ) * glm::vec3( -1.0f, -1.0f, 1.0f ) );
+		}
+
+		if (Input::IsKeyDown( itd::KeyCode::D ) || Input::IsKeyHeld( itd::KeyCode::D ))
+		{
+			camTransform_.Translate( Time::Delta( ) * camTransform_.Right( ) * glm::vec3( 1.0f, 1.0f, -1.0f ) );
+		}
 	}
 
 
 	// Inherited via Application
 	virtual void Render( ) override
 	{
-		transform_.Rotate( glm::vec3( 0.0025f, 0.005f, 0.0f ) );
+		MoveCamera( );
 
-		transform_.Update( );
-		material_->SetMatrix4f( "u_Model", transform_.TRS( ) );
+		meshTransform_.Rotate( glm::vec3( 0.0075f, 0.0075f, 0.0f ) * Time::Delta( ) * 45.0f, itd::TransformationSpace::Local );
+
+		camTransform_.Update( );
+		meshTransform_.Update( );
+
+		material_->SetMatrix4f( "u_Model", meshTransform_.TRS( ) );
+		material_->SetMatrix4f( "u_ViewProjection", camera_.CalculateViewProjection( camTransform_.InverseTRS( ) ) );
 		Graphics::DrawMesh( *mesh_, *material_ );
 	}
 };

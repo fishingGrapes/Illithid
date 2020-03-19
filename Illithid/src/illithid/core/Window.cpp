@@ -121,6 +121,8 @@ namespace itd
 			WindowData& windowData = *( static_cast<WindowData*>( glfwGetWindowUserPointer( window ) ) );
 			windowData.Listener( MouseScrolledEvent( static_cast<float_t>( xOffset ), static_cast<float_t>( yOffset ) ) );
 		} );
+
+		glfwSetCursorPos( window_, windowData_.Width * 0.5, windowData_.Height * 0.5 );
 	}
 
 	void Window::PollEvents( )

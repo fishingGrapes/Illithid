@@ -3,13 +3,16 @@
 #include "illithid/core/Macros.h"
 #include "illithid/core/Application.h"
 #include "illithid/core/Time.h"
+#include "illithid/core/Screen.h"
 #include "illithid/core/Log.h"
+#include "illithid/core/Input.h"
 
 #include "illithid/core/KeyCodes.h"
 #include "illithid/events/KeyEvents.h"
 #include "illithid/events/MouseEvents.h"
 
 #include "illithid/scene/Transform.h"
+#include "illithid/scene/Camera.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
