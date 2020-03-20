@@ -66,29 +66,22 @@ namespace itd
 		scaleMatrix = glm::scale( scaleMatrix, ScaleFactor );
 
 		TRS_ = translateMatrix * rotateMatrix * scaleMatrix;
-
-		//////Calculate inverse matrix : faster alternative to glm::inverse
-		//translateMatrix = glm::mat4( 1.0f );
-		//translateMatrix = glm::translate( translateMatrix, -1.0f * Position );
-		////using orthogonal property of matrices (A)-1 = (A)T
-		//inverseTRS_ = translateMatrix * glm::transpose( rotateMatrix ) * scaleMatrix;
-
 		inverseTRS_ = glm::inverse( TRS_ );
 	}
 
 	glm::vec3 Transform::Forward( ) const
 	{
-		return glm::normalize( glm::vec3( inverseTRS_[ 2 ] ) );
+		return Orientation * glm::vec3( 0.0f, 0.0f, -1.0f );
 	}
 
 	glm::vec3 Transform::Right( ) const
 	{
-		return glm::normalize( glm::vec3( inverseTRS_[ 0 ] ) );
+		return Orientation * glm::vec3( 1.0f, 0.0f, 0.0f );
 	}
 
 	glm::vec3 Transform::Up( ) const
 	{
-		return glm::normalize( glm::vec3( inverseTRS_[ 1 ] ) );
+		return Orientation * glm::vec3( 0.0f, 1.0f, 0.0f );
 	}
 
 

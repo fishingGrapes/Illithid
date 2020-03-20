@@ -32,14 +32,17 @@ namespace itd
 		glEnableVertexArrayAttrib( VAO_, 0 );
 		glEnableVertexArrayAttrib( VAO_, 1 );
 		glEnableVertexArrayAttrib( VAO_, 2 );
+		glEnableVertexArrayAttrib( VAO_, 3 );
 
 		glVertexArrayAttribFormat( VAO_, 0, 3, GL_FLOAT, GL_FALSE, offsetof( Vertex, Position ) );
 		glVertexArrayAttribFormat( VAO_, 1, 4, GL_FLOAT, GL_FALSE, offsetof( Vertex, Color ) );
 		glVertexArrayAttribFormat( VAO_, 2, 2, GL_FLOAT, GL_FALSE, offsetof( Vertex, UV ) );
+		glVertexArrayAttribFormat( VAO_, 3, 3, GL_FLOAT, GL_FALSE, offsetof( Vertex, Normal ) );
 
 		glVertexArrayAttribBinding( VAO_, 0, 0 );
 		glVertexArrayAttribBinding( VAO_, 1, 0 );
 		glVertexArrayAttribBinding( VAO_, 2, 0 );
+		glVertexArrayAttribBinding( VAO_, 3, 0 );
 	}
 
 	void StaticMesh::Bind( ) const
@@ -99,7 +102,11 @@ namespace itd
 					tinyobj::real_t s = attrib.texcoords[ 2 * static_cast<int64_t>( idx.texcoord_index ) + 0 ];
 					tinyobj::real_t t = attrib.texcoords[ 2 * static_cast<int64_t>( idx.texcoord_index ) + 1 ];
 
-					vertices.emplace_back( Vertex{ glm::vec3( x, y, z ), glm::vec4( r, g, b, 1.0f ), glm::vec2( s, t ) } );
+					tinyobj::real_t nx = attrib.normals[ 3 * static_cast<int64_t>( idx.normal_index ) + 0 ];
+					tinyobj::real_t ny = attrib.normals[ 3 * static_cast<int64_t>( idx.normal_index ) + 1 ];
+					tinyobj::real_t nz = attrib.normals[ 3 * static_cast<int64_t>( idx.normal_index ) + 2 ];
+
+					vertices.emplace_back( Vertex{ glm::vec3( x, y, z ), glm::vec4( r, g, b, 1.0f ), glm::vec2( s, t ) , glm::vec3( nx, ny, nz ) } );
 				}
 
 				index_offset += fv;

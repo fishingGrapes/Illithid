@@ -42,7 +42,6 @@ namespace itd
 	private:
 		glm::mat4 TRS_;
 		glm::mat4 inverseTRS_;
-
 	};
 
 }

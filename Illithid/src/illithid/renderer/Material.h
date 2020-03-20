@@ -21,7 +21,10 @@ namespace itd
 		void Use( );
 		void SetInt( const char* uniform, int32_t value );
 		void SetFloat( const char* uniform, float_t value );
-		void SetVector2f( const char* uniform, glm::vec2& value );
+		void SetVector2f( const char* uniform, const glm::vec2& value );
+		void SetVector3f( const char* uniform, const glm::vec3& value );
+		void SetVector4f( const char* uniform, const glm::vec4& value );
+		void SetMatrix3f( const char* uniform, const glm::mat3& value );
 		void SetMatrix4f( const char* uniform, const glm::mat4& value );
 
 	private:

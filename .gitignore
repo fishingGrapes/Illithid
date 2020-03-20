@@ -34,7 +34,8 @@
 #Directories
 .vs/
 binaries/
-Sandbox/Assets
+Sandbox/Assets/Raw/Textures/
+Sandbox/Assets/Models/
 
 #Files
 *.user

@@ -147,10 +147,28 @@ namespace itd
 		glProgramUniform1f( program_, data.Location, value );
 	}
 
-	void Material::SetVector2f( const char* uniform, glm::vec2& value )
+	void Material::SetVector2f( const char* uniform, const glm::vec2& value )
 	{
 		UniformData& data = uniformMap_[ uniform ];
 		glProgramUniform2fv( program_, data.Location, 1, glm::value_ptr( value ) );
+	}
+
+	void Material::SetVector3f( const char* uniform, const glm::vec3& value )
+	{
+		UniformData& data = uniformMap_[ uniform ];
+		glProgramUniform3fv( program_, data.Location, 1, glm::value_ptr( value ) );
+	}
+
+	void Material::SetVector4f( const char* uniform, const glm::vec4& value )
+	{
+		UniformData& data = uniformMap_[ uniform ];
+		glProgramUniform4fv( program_, data.Location, 1, glm::value_ptr( value ) );
+	}
+
+	void Material::SetMatrix3f( const char* uniform, const glm::mat3& value )
+	{
+		UniformData& data = uniformMap_[ uniform ];
+		glProgramUniformMatrix3fv( program_, data.Location, 1, GL_FALSE, glm::value_ptr( value ) );
 	}
 
 	void Material::SetMatrix4f( const char* uniform, const glm::mat4& value )

@@ -17,6 +17,11 @@ namespace glm
 		return os << "(" << obj.x << ",  " << obj.y << ",  " << obj.z << ")";
 	}
 
+	std::ostream& operator<< ( std::ostream& os, const vec4& obj )
+	{
+		return os << "(" << obj.x << ",  " << obj.y << ",  " << obj.z << ",  " << obj.w << ")";
+	}
+
 	std::ostream& operator<< ( std::ostream& os, const quat& obj )
 	{
 		return os << "(" << obj.w << ",  " << obj.x << ",  " << obj.y << ",  " << obj.z << ")";

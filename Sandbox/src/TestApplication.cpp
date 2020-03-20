@@ -1,6 +1,8 @@
 #include "Illithid.h"
 #include "illithid/core/EntryPoint.h"
 
+#include"SceneObjects.h"
+
 using Screen = itd::Screen;
 using Time = itd::Time;
 using Input = itd::Input;
@@ -15,13 +17,10 @@ using MouseMovedEvent = itd::MouseMovedEvent;
 
 using Graphics = itd::Graphics;
 using Shader = itd::Shader;
-using StaticMesh = itd::StaticMesh;
 using Vertex = itd::Vertex;
 using Material = itd::Material;
 using Texture2D = itd::Texture2D;
 
-using Transform = itd::Transform;
-using Camera = itd::Camera;
 using PerspectiveProjection = itd::PerspectiveProjection;
 using OrthographicProjection = itd::OrthographicProjection;
 
@@ -29,15 +28,15 @@ class TestApplication : public itd::Application
 {
 
 private:
-	std::unique_ptr<Material> material_;
-	std::shared_ptr<StaticMesh> mesh_;
+	std::unique_ptr<Material> basicMat_, phongMat_;
 	std::shared_ptr<Texture2D> boxTexture_;
 
 	glm::vec2 mousePosition_;
 	glm::vec3 rotation_;
 
-	Transform camTransform_, meshTransform_;
-	Camera camera_;
+	MeshObject boxObject_;
+	CameraObject cObject_;
+	LightObject lObject_;
 
 public:
 
@@ -55,17 +54,27 @@ public:
 	{
 		boxTexture_ = Texture2D::Load( "Assets/Textures/box.tex2D" );
 
-		Shader shader( "Assets/Shaders/basic.shader" );
-		material_ = std::make_unique<Material>( shader );
-		material_->SetTexture( "u_BrickWall", boxTexture_ );
+		Shader basicShader( "Assets/Shaders/basic.shader" );
+		basicMat_ = std::make_unique<Material>( basicShader );
 
-		mesh_ = StaticMesh::Load( "Assets/Models/box.obj" );
-		Graphics::SetPolygonMode( itd::PolygonFace::PF_Front, itd::PolygonMode::PM_Fill );
+		Shader phongShader( "Assets/Shaders/phong.shader" );
+		phongMat_ = std::make_unique<Material>( phongShader );
 
-		camera_.SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
-		camTransform_.Translate( glm::vec3( 0.0f, 0.0f, 1.0f ) );
+		//material_->SetTexture( "u_BrickWall", boxTexture_ );
+
+		boxObject_.mesh = StaticMesh::Load( "Assets/Models/box.obj" );
+		lObject_.mesh = StaticMesh::Load( "Assets/Models/box.obj" );
+
+		cObject_.camera.SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
+		cObject_.transform.Translate( glm::vec3( 0.0f, 0.0f, 1.0f ) );
+
+		lObject_.transform.Translate( glm::vec3( 1.0f, 1.5f, -2.0f ) );
+		lObject_.transform.Scale( glm::vec3( 0.25f ) );
+		lObject_.color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 
 		mousePosition_ = glm::vec2( Screen::Width( ) * 0.5f, Screen::Height( ) * 0.5f );
+
+		//Graphics::SetPolygonMode( itd::PolygonFace::PF_Front, itd::PolygonMode::PM_Fill );
 	}
 
 	virtual void Shutdown( ) override
@@ -80,6 +89,7 @@ public:
 		EventDispatcher dispatcher( event );
 		dispatcher.Dispatch<MouseMovedEvent>( [ this ] ( MouseMovedEvent& evnt ) -> bool
 		{
+
 			float_t deltaX = mousePosition_.x - evnt.X( );
 			float_t deltaY = mousePosition_.y - evnt.Y( );
 
@@ -97,8 +107,9 @@ public:
 				deltaY = 0.0f;
 				rotation_.y -= deltaY;
 			}
-			IL_TRACE( glm::abs( glm::degrees( rotation_.y ) ) );
-			camTransform_.Rotate( glm::vec3( deltaY, deltaX, 0.0f ), itd::TransformationSpace::Camera );
+
+			cObject_.transform.Rotate( glm::vec3( deltaY, deltaX, 0.0f ), itd::TransformationSpace::Camera );
+
 
 			return false;
 		} );
@@ -108,23 +119,25 @@ public:
 	{
 		if (Input::IsKeyDown( itd::KeyCode::W ) || Input::IsKeyHeld( itd::KeyCode::W ))
 		{
-			camTransform_.Translate( Time::Delta( ) * camTransform_.Forward( ) * glm::vec3( 1.0f, 1.0f, -1.0f ) );
+			cObject_.transform.Translate( Time::Delta( ) * cObject_.transform.Forward( ) );
 		}
 
 		if (Input::IsKeyDown( itd::KeyCode::S ) || Input::IsKeyHeld( itd::KeyCode::S ))
 		{
-			camTransform_.Translate( Time::Delta( ) * camTransform_.Forward( ) * glm::vec3( -1.0f, -1.0f, 1.0f ) );
+			cObject_.transform.Translate( Time::Delta( ) * cObject_.transform.Forward( ) * -1.0f );
 		}
 
 		if (Input::IsKeyDown( itd::KeyCode::A ) || Input::IsKeyHeld( itd::KeyCode::A ))
 		{
-			camTransform_.Translate( Time::Delta( ) * camTransform_.Right( ) * glm::vec3( -1.0f, -1.0f, 1.0f ) );
+			cObject_.transform.Translate( Time::Delta( ) * cObject_.transform.Right( ) * -1.0f );
 		}
 
 		if (Input::IsKeyDown( itd::KeyCode::D ) || Input::IsKeyHeld( itd::KeyCode::D ))
 		{
-			camTransform_.Translate( Time::Delta( ) * camTransform_.Right( ) * glm::vec3( 1.0f, 1.0f, -1.0f ) );
+			cObject_.transform.Translate( Time::Delta( ) * cObject_.transform.Right( ) );
 		}
+
+		IL_TRACE( cObject_.transform.Forward( ) );
 	}
 
 
@@ -132,15 +145,26 @@ public:
 	virtual void Render( ) override
 	{
 		MoveCamera( );
+		boxObject_.transform.Rotate( glm::vec3( 0.0075f, 0.0075f, 0.0f ) * Time::Delta( ) * 45.0f, itd::TransformationSpace::Local );
 
-		meshTransform_.Rotate( glm::vec3( 0.0075f, 0.0075f, 0.0f ) * Time::Delta( ) * 45.0f, itd::TransformationSpace::Local );
+		cObject_.transform.Update( );
+		boxObject_.transform.Update( );
+		lObject_.transform.Update( );
 
-		camTransform_.Update( );
-		meshTransform_.Update( );
+		basicMat_->SetMatrix4f( "u_ViewProjection", cObject_.camera.CalculateViewProjection( cObject_.transform.InverseTRS( ) ) );
+		phongMat_->SetMatrix4f( "u_ViewProjection", cObject_.camera.CalculateViewProjection( cObject_.transform.InverseTRS( ) ) );
 
-		material_->SetMatrix4f( "u_Model", meshTransform_.TRS( ) );
-		material_->SetMatrix4f( "u_ViewProjection", camera_.CalculateViewProjection( camTransform_.InverseTRS( ) ) );
-		Graphics::DrawMesh( *mesh_, *material_ );
+		phongMat_->SetVector4f( "u_Color", glm::vec4( 1.0f, 0.5f, 0.31f, 1.0f ) );
+		phongMat_->SetVector4f( "u_LightColor", lObject_.color );
+		phongMat_->SetFloat( "u_AmbientStrength", 0.1f );
+		phongMat_->SetMatrix4f( "u_Model", boxObject_.transform.TRS( ) );
+		phongMat_->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( boxObject_.transform.InverseTRS( ) ) ) );
+		phongMat_->SetVector3f( "u_LightPosition", lObject_.transform.Position );
+		Graphics::DrawMesh( *boxObject_.mesh, *phongMat_ );
+
+		basicMat_->SetVector4f( "u_Color", lObject_.color );
+		basicMat_->SetMatrix4f( "u_Model", lObject_.transform.TRS( ) );
+		Graphics::DrawMesh( *lObject_.mesh, *basicMat_ );
 	}
 };
 
