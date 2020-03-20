@@ -95,16 +95,45 @@ namespace itd
 					tinyobj::real_t y = attrib.vertices[ 3 * static_cast<int64_t>( idx.vertex_index ) + 1 ];
 					tinyobj::real_t z = attrib.vertices[ 3 * static_cast<int64_t>( idx.vertex_index ) + 2 ];
 
-					tinyobj::real_t r = attrib.colors[ 3 * static_cast<int64_t>( idx.vertex_index ) + 0 ];
-					tinyobj::real_t g = attrib.colors[ 3 * static_cast<int64_t>( idx.vertex_index ) + 1 ];
-					tinyobj::real_t b = attrib.colors[ 3 * static_cast<int64_t>( idx.vertex_index ) + 2 ];
+					tinyobj::real_t r;
+					tinyobj::real_t g;
+					tinyobj::real_t b;
+					if (!attrib.colors.empty( ))
+					{
+						r = attrib.colors[ 3 * static_cast<int64_t>( idx.vertex_index ) + 0 ];
+						g = attrib.colors[ 3 * static_cast<int64_t>( idx.vertex_index ) + 1 ];
+						b = attrib.colors[ 3 * static_cast<int64_t>( idx.vertex_index ) + 2 ];
+					}
+					else
+					{
+						r = g = b = 1.0f;
+					}
 
-					tinyobj::real_t s = attrib.texcoords[ 2 * static_cast<int64_t>( idx.texcoord_index ) + 0 ];
-					tinyobj::real_t t = attrib.texcoords[ 2 * static_cast<int64_t>( idx.texcoord_index ) + 1 ];
+					tinyobj::real_t s;
+					tinyobj::real_t t;
+					if (!attrib.texcoords.empty( ))
+					{
+						s = attrib.texcoords[ 2 * static_cast<int64_t>( idx.texcoord_index ) + 0 ];
+						t = attrib.texcoords[ 2 * static_cast<int64_t>( idx.texcoord_index ) + 1 ];
+					}
+					else
+					{
+						s = t = 0.0f;
+					}
 
-					tinyobj::real_t nx = attrib.normals[ 3 * static_cast<int64_t>( idx.normal_index ) + 0 ];
-					tinyobj::real_t ny = attrib.normals[ 3 * static_cast<int64_t>( idx.normal_index ) + 1 ];
-					tinyobj::real_t nz = attrib.normals[ 3 * static_cast<int64_t>( idx.normal_index ) + 2 ];
+					tinyobj::real_t nx;
+					tinyobj::real_t ny;
+					tinyobj::real_t nz;
+					if (!attrib.normals.empty( ))
+					{
+						nx = attrib.normals[ 3 * static_cast<int64_t>( idx.normal_index ) + 0 ];
+						ny = attrib.normals[ 3 * static_cast<int64_t>( idx.normal_index ) + 1 ];
+						nz = attrib.normals[ 3 * static_cast<int64_t>( idx.normal_index ) + 2 ];
+					}
+					else
+					{
+						nx = ny = nz = 0.0f;
+					}
 
 					vertices.emplace_back( Vertex{ glm::vec3( x, y, z ), glm::vec4( r, g, b, 1.0f ), glm::vec2( s, t ) , glm::vec3( nx, ny, nz ) } );
 				}

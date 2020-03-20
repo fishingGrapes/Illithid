@@ -46,7 +46,7 @@ namespace itd
 			Time::delta_ = ( std::chrono::duration_cast<std::chrono::microseconds>( currentTime - previousTime ).count( ) ) / 1000000.0f;
 			Time::elapsed_ = ( std::chrono::duration_cast<std::chrono::microseconds>( currentTime - startTime ).count( ) ) / 1000000.0f;
 
-			Graphics::ClearColor( 0.0f, 0.5f, 0.5f, 1.0f );
+			Graphics::ClearColor( 0.1f, 0.1f, 0.1f, 1.0f );
 			Graphics::Clear( BufferBit::BB_Color | BufferBit::BB_Depth );
 
 			this->Render( );
@@ -64,6 +64,7 @@ namespace itd
 	{
 		EventDispatcher dispatcher( event );
 		dispatcher.Dispatch<WindowClosedEvent>( BIND_EVENT_FUNCTION( Application::OnWindowClosed, this ) );
+		dispatcher.Dispatch<WindowResizedEvent>( BIND_EVENT_FUNCTION( Application::OnWindowResized, this ) );
 
 		Input::ProcessEvent( event );
 	}
@@ -96,5 +97,12 @@ namespace itd
 
 		isRunning_ = false;
 		return true;
+	}
+	bool Application::OnWindowResized( WindowResizedEvent& event )
+	{
+		Screen::width_ = event.Width( );
+		Screen::height_ = event.Height( );
+
+		return false;
 	}
 }

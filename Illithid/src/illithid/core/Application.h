@@ -26,6 +26,7 @@ namespace itd
 		void Initialize( );
 		void Destroy( );
 		bool OnWindowClosed( WindowClosedEvent& event );
+		bool OnWindowResized( WindowResizedEvent& event );
 
 		std::unique_ptr<Window> window_;
 		bool isRunning_;

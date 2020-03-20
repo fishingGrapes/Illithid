@@ -62,19 +62,16 @@ public:
 
 		//material_->SetTexture( "u_BrickWall", boxTexture_ );
 
-		boxObject_.mesh = StaticMesh::Load( "Assets/Models/box.obj" );
+		boxObject_.mesh = StaticMesh::Load( "Assets/Models/cup.obj" );
 		lObject_.mesh = StaticMesh::Load( "Assets/Models/box.obj" );
 
 		cObject_.camera.SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
 		cObject_.transform.Translate( glm::vec3( 0.0f, 0.0f, 1.0f ) );
 
-		lObject_.transform.Translate( glm::vec3( 1.0f, 1.5f, -2.0f ) );
 		lObject_.transform.Scale( glm::vec3( 0.25f ) );
 		lObject_.color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 
 		mousePosition_ = glm::vec2( Screen::Width( ) * 0.5f, Screen::Height( ) * 0.5f );
-
-		//Graphics::SetPolygonMode( itd::PolygonFace::PF_Front, itd::PolygonMode::PM_Fill );
 	}
 
 	virtual void Shutdown( ) override
@@ -113,6 +110,12 @@ public:
 
 			return false;
 		} );
+
+		dispatcher.Dispatch<itd::WindowResizedEvent>( [ this ]( itd::WindowResizedEvent& evnt ) -> bool
+		{
+			cObject_.camera.SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
+			return false;
+		});
 	}
 
 	void MoveCamera( )
@@ -137,7 +140,6 @@ public:
 			cObject_.transform.Translate( Time::Delta( ) * cObject_.transform.Right( ) );
 		}
 
-		IL_TRACE( cObject_.transform.Forward( ) );
 	}
 
 
@@ -145,7 +147,9 @@ public:
 	virtual void Render( ) override
 	{
 		MoveCamera( );
-		boxObject_.transform.Rotate( glm::vec3( 0.0075f, 0.0075f, 0.0f ) * Time::Delta( ) * 45.0f, itd::TransformationSpace::Local );
+		float_t angle = Time::Elapsed( ) * 0.5f;
+		lObject_.transform.Position = glm::vec3( 2.0f * glm::cos( angle ), 0.0f, 2.0f * glm::sin( angle ) );
+
 
 		cObject_.transform.Update( );
 		boxObject_.transform.Update( );
@@ -154,12 +158,18 @@ public:
 		basicMat_->SetMatrix4f( "u_ViewProjection", cObject_.camera.CalculateViewProjection( cObject_.transform.InverseTRS( ) ) );
 		phongMat_->SetMatrix4f( "u_ViewProjection", cObject_.camera.CalculateViewProjection( cObject_.transform.InverseTRS( ) ) );
 
-		phongMat_->SetVector4f( "u_Color", glm::vec4( 1.0f, 0.5f, 0.31f, 1.0f ) );
-		phongMat_->SetVector4f( "u_LightColor", lObject_.color );
-		phongMat_->SetFloat( "u_AmbientStrength", 0.1f );
 		phongMat_->SetMatrix4f( "u_Model", boxObject_.transform.TRS( ) );
 		phongMat_->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( boxObject_.transform.InverseTRS( ) ) ) );
+		phongMat_->SetVector4f( "u_Color", glm::vec4( 1.0f, 0.5f, 0.31f, 1.0f ) );
+
+		phongMat_->SetFloat( "u_AmbientStrength", 0.1f );
+		phongMat_->SetFloat( "u_SpecularStrength", 0.5f );
+
+		phongMat_->SetVector4f( "u_LightColor", lObject_.color );
 		phongMat_->SetVector3f( "u_LightPosition", lObject_.transform.Position );
+
+		phongMat_->SetVector3f( "u_ViewPosition", cObject_.transform.Position );
+
 		Graphics::DrawMesh( *boxObject_.mesh, *phongMat_ );
 
 		basicMat_->SetVector4f( "u_Color", lObject_.color );
