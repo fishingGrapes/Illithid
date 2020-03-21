@@ -28,8 +28,7 @@ class TestApplication : public itd::Application
 {
 
 private:
-	std::unique_ptr<Material> basicMat_, phongMat_;
-	std::shared_ptr<Texture2D> boxTexture_;
+	std::unique_ptr<Material> basicMat_, phongMat_, colorMat_;;
 
 	glm::vec2 mousePosition_;
 	glm::vec3 rotation_;
@@ -37,6 +36,7 @@ private:
 	MeshObject boxObject_;
 	CameraObject cObject_;
 	LightObject lObject_;
+
 
 public:
 
@@ -52,15 +52,14 @@ public:
 	// Inherited via Application
 	virtual void Start( ) override
 	{
-		boxTexture_ = Texture2D::Load( "Assets/Textures/box.tex2D" );
-
 		Shader basicShader( "Assets/Shaders/basic.shader" );
 		basicMat_ = std::make_unique<Material>( basicShader );
 
 		Shader phongShader( "Assets/Shaders/phong.shader" );
 		phongMat_ = std::make_unique<Material>( phongShader );
 
-		//material_->SetTexture( "u_BrickWall", boxTexture_ );
+		Shader colorShader( "Assets/Shaders/color.shader" );
+		colorMat_ = std::make_unique<Material>( colorShader );
 
 		boxObject_.mesh = StaticMesh::Load( "Assets/Models/cup.obj" );
 		lObject_.mesh = StaticMesh::Load( "Assets/Models/box.obj" );
@@ -99,10 +98,10 @@ public:
 			rotation_.x += deltaX;
 			rotation_.y += deltaY;
 
-			if (glm::abs( glm::degrees( rotation_.y ) ) > 90.0f)
+			if (glm::abs( glm::degrees( rotation_.y ) ) > 70.0f)
 			{
 				deltaY = 0.0f;
-				rotation_.y -= deltaY;
+				rotation_.y = glm::sign( glm::degrees( rotation_.y ) ) * glm::radians( 70.0f );
 			}
 
 			cObject_.transform.Rotate( glm::vec3( deltaY, deltaX, 0.0f ), itd::TransformationSpace::Camera );
@@ -111,11 +110,11 @@ public:
 			return false;
 		} );
 
-		dispatcher.Dispatch<itd::WindowResizedEvent>( [ this ]( itd::WindowResizedEvent& evnt ) -> bool
+		dispatcher.Dispatch<itd::WindowResizedEvent>( [ this ] ( itd::WindowResizedEvent& evnt ) -> bool
 		{
 			cObject_.camera.SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
 			return false;
-		});
+		} );
 	}
 
 	void MoveCamera( )
@@ -142,6 +141,16 @@ public:
 
 	}
 
+	void DrawAxesLines( const AxesLines& axes, const glm::mat4& modelMatrix )
+	{
+		colorMat_->SetMatrix4f( "u_Model", modelMatrix );
+		for (size_t i = 0; i < axes.lines.size( ); i++)
+		{
+			colorMat_->SetVector4f( "u_Color", axes.colors[ i ] );
+			Graphics::DrawLineSegment( *axes.lines[ i ], *colorMat_ );
+		}
+	}
+
 
 	// Inherited via Application
 	virtual void Render( ) override
@@ -150,31 +159,30 @@ public:
 		float_t angle = Time::Elapsed( ) * 0.5f;
 		lObject_.transform.Position = glm::vec3( 2.0f * glm::cos( angle ), 0.0f, 2.0f * glm::sin( angle ) );
 
-
 		cObject_.transform.Update( );
 		boxObject_.transform.Update( );
 		lObject_.transform.Update( );
 
 		basicMat_->SetMatrix4f( "u_ViewProjection", cObject_.camera.CalculateViewProjection( cObject_.transform.InverseTRS( ) ) );
 		phongMat_->SetMatrix4f( "u_ViewProjection", cObject_.camera.CalculateViewProjection( cObject_.transform.InverseTRS( ) ) );
+		colorMat_->SetMatrix4f( "u_ViewProjection", cObject_.camera.CalculateViewProjection( cObject_.transform.InverseTRS( ) ) );
 
 		phongMat_->SetMatrix4f( "u_Model", boxObject_.transform.TRS( ) );
 		phongMat_->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( boxObject_.transform.InverseTRS( ) ) ) );
 		phongMat_->SetVector4f( "u_Color", glm::vec4( 1.0f, 0.5f, 0.31f, 1.0f ) );
-
 		phongMat_->SetFloat( "u_AmbientStrength", 0.1f );
 		phongMat_->SetFloat( "u_SpecularStrength", 0.5f );
-
 		phongMat_->SetVector4f( "u_LightColor", lObject_.color );
 		phongMat_->SetVector3f( "u_LightPosition", lObject_.transform.Position );
-
 		phongMat_->SetVector3f( "u_ViewPosition", cObject_.transform.Position );
-
 		Graphics::DrawMesh( *boxObject_.mesh, *phongMat_ );
 
 		basicMat_->SetVector4f( "u_Color", lObject_.color );
 		basicMat_->SetMatrix4f( "u_Model", lObject_.transform.TRS( ) );
 		Graphics::DrawMesh( *lObject_.mesh, *basicMat_ );
+
+		DrawAxesLines( boxObject_.axes, boxObject_.transform.TRS( ) );
+		DrawAxesLines( lObject_.axes, lObject_.transform.TRS( ) );
 	}
 };
 

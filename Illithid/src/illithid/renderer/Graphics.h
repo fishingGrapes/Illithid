@@ -5,6 +5,7 @@
 #include "StaticMesh.h"
 #include "Material.h"
 #include "Texture2D.h"
+#include "LineSegment.h"
 
 namespace itd
 {
@@ -23,6 +24,7 @@ namespace itd
 		static void SetPolygonMode(PolygonFace face, PolygonMode mode );
 
 		static void DrawMesh( StaticMesh& mesh, Material& material );
+		static void DrawLineSegment( LineSegment& mesh, Material& material );
 
 	private:
 		using GLenum = uint32_t;

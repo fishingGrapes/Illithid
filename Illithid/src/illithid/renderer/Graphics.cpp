@@ -65,6 +65,14 @@ namespace itd
 		glDrawArrays( GL_TRIANGLES, 0, static_cast<GLsizei>( mesh.VertexCount( ) ) );
 	}
 
+	void Graphics::DrawLineSegment( LineSegment& mesh, Material& material )
+	{
+		material.Use( );
+		mesh.Bind( );
+
+		glDrawArrays( GL_LINES, 0, static_cast<GLsizei>( 2 ) );
+	}
+
 
 	void Graphics::GLErrorCallback( GLenum source, GLenum type, GLenum id, GLenum severity, GLsizei length,
 									const GLchar* message, const void* userParam )
