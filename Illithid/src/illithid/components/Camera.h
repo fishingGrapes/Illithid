@@ -1,5 +1,6 @@
 #pragma once
 #include "glm/glm.hpp"
+#include "illithid/scene/Component.h"
 
 namespace itd
 {
@@ -26,7 +27,7 @@ namespace itd
 		float_t Far;
 	};
 
-	class Camera
+	class Camera : public Component<Camera>
 	{
 	public:
 
@@ -35,9 +36,27 @@ namespace itd
 		void SetPerspectiveProjection( const PerspectiveProjection& projection );
 		void SetOrthographicProjection( const OrthographicProjection& projection );
 
-		glm::mat4 CalculateViewProjection( const glm::mat4& viewMatrix );
+		glm::mat4 ViewProjection( );
+
+		virtual void OnStart( ) override;
+		virtual void OnUpdate( ) override;
+		virtual void OnPreRender( ) override;
+		virtual void OnRender( ) override;
+		virtual void OnPostRender( ) override;
+
+
+		static void SetAsPrimary( std::shared_ptr<Camera> camera )
+		{
+			primaryCamera_ = camera;
+		}
+
+		inline static std::shared_ptr<Camera> Primary( )
+		{
+			return primaryCamera_;
+		}
 
 	private:
 		glm::mat4 projectionMatrix_;
+		static std::shared_ptr<Camera> primaryCamera_;
 	};
 }

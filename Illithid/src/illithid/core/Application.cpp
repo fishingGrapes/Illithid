@@ -9,6 +9,8 @@
 #include "FileSystem.h"
 #include "Input.h"
 #include "illithid/renderer/Graphics.h"
+#include "illithid/scene/SceneGraph.h"
+#include "Resources.h"
 
 namespace itd
 {
@@ -46,10 +48,17 @@ namespace itd
 			Time::delta_ = ( std::chrono::duration_cast<std::chrono::microseconds>( currentTime - previousTime ).count( ) ) / 1000000.0f;
 			Time::elapsed_ = ( std::chrono::duration_cast<std::chrono::microseconds>( currentTime - startTime ).count( ) ) / 1000000.0f;
 
+			SceneGraph::Update( );
+			this->Update( );
+
+			SceneGraph::PreRender( );
+			this->PreRender( );
+
 			Graphics::ClearColor( 0.1f, 0.1f, 0.1f, 1.0f );
 			Graphics::Clear( BufferBit::BB_Color | BufferBit::BB_Depth );
 
-			this->Render( );
+			SceneGraph::Render( );
+			SceneGraph::PostRender( );
 
 			window_->SwapBuffers( );
 			window_->PollEvents( );
@@ -84,6 +93,8 @@ namespace itd
 
 		Graphics::Initialize( window_ );
 		Input::Initialize( );
+
+		Resources::Initialize( );
 	}
 
 	void Application::Destroy( )

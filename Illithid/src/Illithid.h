@@ -11,14 +11,18 @@
 #include "illithid/events/KeyEvents.h"
 #include "illithid/events/MouseEvents.h"
 
-#include "illithid/scene/Transform.h"
-#include "illithid/scene/Camera.h"
+#include "illithid/components/Transform.h"
+#include "illithid/components/Camera.h"
+#include "illithid/components/Light.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 #include "nlohmann/json.hpp"
 
 #include "illithid/renderer/Graphics.h"
+#include "illithid/scene/GameObject.h"
 
+#include "illithid/components/MeshRenderer.h"
+#include "illithid/components/Transform.h"
 
 #include "illithid/core/LogExtensions.h"

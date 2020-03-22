@@ -2,10 +2,7 @@
 #include "Illithid.h"
 
 
-using Transform = itd::Transform;
-using Camera = itd::Camera;
-using StaticMesh = itd::StaticMesh;
-using LineSegment = itd::LineSegment;
+
 
 
 struct AxesLines

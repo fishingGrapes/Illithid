@@ -18,7 +18,9 @@ namespace itd
 	protected:
 		virtual void Start( ) = 0;
 		virtual void Shutdown( ) = 0;
-		virtual void Render( ) = 0;
+
+		virtual void Update( ) = 0;
+		virtual void PreRender( ) = 0;
 
 		virtual void OnEvent( Event& event );
 
@@ -30,6 +32,8 @@ namespace itd
 
 		std::unique_ptr<Window> window_;
 		bool isRunning_;
+
+
 	};
 
 	//Just the Declaration, defined in client with the child class

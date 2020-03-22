@@ -1,8 +1,6 @@
 #include "Illithid.h"
 #include "illithid/core/EntryPoint.h"
 
-#include"SceneObjects.h"
-
 using Screen = itd::Screen;
 using Time = itd::Time;
 using Input = itd::Input;
@@ -24,19 +22,23 @@ using Texture2D = itd::Texture2D;
 using PerspectiveProjection = itd::PerspectiveProjection;
 using OrthographicProjection = itd::OrthographicProjection;
 
+using GameObject = itd::GameObject;
+using MeshRenderer = itd::MeshRenderer;
+using Light = itd::Light;
+using Transform = itd::Transform;
+using Camera = itd::Camera;
+using StaticMesh = itd::StaticMesh;
+using LineSegment = itd::LineSegment;
+
 class TestApplication : public itd::Application
 {
 
 private:
-	std::unique_ptr<Material> basicMat_, phongMat_, colorMat_;;
 
 	glm::vec2 mousePosition_;
 	glm::vec3 rotation_;
 
-	MeshObject boxObject_;
-	CameraObject cObject_;
-	LightObject lObject_;
-
+	std::unique_ptr<GameObject> cup_, camera_, light_;
 
 public:
 
@@ -53,24 +55,36 @@ public:
 	virtual void Start( ) override
 	{
 		Shader basicShader( "Assets/Shaders/basic.shader" );
-		basicMat_ = std::make_unique<Material>( basicShader );
+		std::shared_ptr<Material> basicMat_ = std::make_unique<Material>( basicShader );
 
 		Shader phongShader( "Assets/Shaders/phong.shader" );
-		phongMat_ = std::make_unique<Material>( phongShader );
+		std::shared_ptr<Material> phongMat_ = std::make_unique<Material>( phongShader );
 
-		Shader colorShader( "Assets/Shaders/color.shader" );
-		colorMat_ = std::make_unique<Material>( colorShader );
+		cup_ = std::make_unique<GameObject>( );
+		auto cupRenderer = cup_->AddComponent<MeshRenderer>( );
+		cupRenderer->Mesh = StaticMesh::Load( "Assets/Models/cup.obj" );
+		cupRenderer->Material = phongMat_;
+		cupRenderer->Material->SetVector4f( "u_Color", glm::vec4( 1.0f, 0.5f, 0.31f, 1.0f ) );
+		cupRenderer->Material->SetFloat( "u_AmbientStrength", 0.1f );
+		cupRenderer->Material->SetFloat( "u_SpecularStrength", 0.5f );
 
-		boxObject_.mesh = StaticMesh::Load( "Assets/Models/cup.obj" );
-		lObject_.mesh = StaticMesh::Load( "Assets/Models/box.obj" );
+		camera_ = std::make_unique<GameObject>( );
+		camera_->GetTransform( )->Translate( glm::vec3( 0.0f, 0.0f, 1.0f ) );
+		auto cam = camera_->AddComponent<Camera>( );
+		cam->SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
 
-		cObject_.camera.SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
-		cObject_.transform.Translate( glm::vec3( 0.0f, 0.0f, 1.0f ) );
-
-		lObject_.transform.Scale( glm::vec3( 0.25f ) );
-		lObject_.color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+		light_ = std::make_unique<GameObject>( );
+		light_->GetTransform( )->Scale( glm::vec3( 0.25f ) );
+		auto lightComp = light_->AddComponent<Light>( );
+		lightComp->Color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+		auto lightRenderer = light_->AddComponent<MeshRenderer>( );
+		lightRenderer->Mesh = StaticMesh::Load( "Assets/Models/box.obj" );
+		lightRenderer->Material = basicMat_;
+		lightRenderer->Material->SetVector4f( "u_Color", lightComp->Color );
+		cupRenderer->Material->SetVector4f( "u_LightColor", lightComp->Color );
 
 		mousePosition_ = glm::vec2( Screen::Width( ) * 0.5f, Screen::Height( ) * 0.5f );
+		Camera::SetAsPrimary( cam );
 	}
 
 	virtual void Shutdown( ) override
@@ -104,7 +118,7 @@ public:
 				rotation_.y = glm::sign( glm::degrees( rotation_.y ) ) * glm::radians( 70.0f );
 			}
 
-			cObject_.transform.Rotate( glm::vec3( deltaY, deltaX, 0.0f ), itd::TransformationSpace::Camera );
+			camera_->GetTransform( )->Rotate( glm::vec3( deltaY, deltaX, 0.0f ), itd::TransformationSpace::Camera );
 
 
 			return false;
@@ -112,7 +126,7 @@ public:
 
 		dispatcher.Dispatch<itd::WindowResizedEvent>( [ this ] ( itd::WindowResizedEvent& evnt ) -> bool
 		{
-			cObject_.camera.SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
+			camera_->GetComponent<Camera>( )->SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
 			return false;
 		} );
 	}
@@ -121,69 +135,46 @@ public:
 	{
 		if (Input::IsKeyDown( itd::KeyCode::W ) || Input::IsKeyHeld( itd::KeyCode::W ))
 		{
-			cObject_.transform.Translate( Time::Delta( ) * cObject_.transform.Forward( ) );
+			camera_->GetTransform( )->Translate( Time::Delta( ) * camera_->GetTransform( )->Forward( ) );
 		}
 
 		if (Input::IsKeyDown( itd::KeyCode::S ) || Input::IsKeyHeld( itd::KeyCode::S ))
 		{
-			cObject_.transform.Translate( Time::Delta( ) * cObject_.transform.Forward( ) * -1.0f );
+			camera_->GetTransform( )->Translate( Time::Delta( ) * camera_->GetTransform( )->Forward( ) * -1.0f );
 		}
 
 		if (Input::IsKeyDown( itd::KeyCode::A ) || Input::IsKeyHeld( itd::KeyCode::A ))
 		{
-			cObject_.transform.Translate( Time::Delta( ) * cObject_.transform.Right( ) * -1.0f );
+			camera_->GetTransform( )->Translate( Time::Delta( ) * camera_->GetTransform( )->Right( ) * -1.0f );
 		}
 
 		if (Input::IsKeyDown( itd::KeyCode::D ) || Input::IsKeyHeld( itd::KeyCode::D ))
 		{
-			cObject_.transform.Translate( Time::Delta( ) * cObject_.transform.Right( ) );
+			camera_->GetTransform( )->Translate( Time::Delta( ) * camera_->GetTransform( )->Right( ) );
 		}
 
 	}
 
-	void DrawAxesLines( const AxesLines& axes, const glm::mat4& modelMatrix )
+	// Inherited via Application
+	virtual void Update( ) override
 	{
-		colorMat_->SetMatrix4f( "u_Model", modelMatrix );
-		for (size_t i = 0; i < axes.lines.size( ); i++)
-		{
-			colorMat_->SetVector4f( "u_Color", axes.colors[ i ] );
-			Graphics::DrawLineSegment( *axes.lines[ i ], *colorMat_ );
-		}
+		float_t angle = Time::Elapsed( ) * 0.5f;
+		light_->GetTransform()->Position = glm::vec3( 2.0f * glm::cos( angle ), 0.0f, 2.0f * glm::sin( angle ) );
+
+		MoveCamera( );
+
+		auto cupRenderer = cup_->GetComponent<MeshRenderer>( );
+		cupRenderer->Material->SetVector3f( "u_ViewPosition", camera_->GetTransform( )->Position );
+		cupRenderer->Material->SetVector3f( "u_LightPosition", light_->GetTransform( )->Position );
 	}
 
 
 	// Inherited via Application
-	virtual void Render( ) override
+	virtual void PreRender( ) override
 	{
-		MoveCamera( );
-		float_t angle = Time::Elapsed( ) * 0.5f;
-		lObject_.transform.Position = glm::vec3( 2.0f * glm::cos( angle ), 0.0f, 2.0f * glm::sin( angle ) );
-
-		cObject_.transform.Update( );
-		boxObject_.transform.Update( );
-		lObject_.transform.Update( );
-
-		basicMat_->SetMatrix4f( "u_ViewProjection", cObject_.camera.CalculateViewProjection( cObject_.transform.InverseTRS( ) ) );
-		phongMat_->SetMatrix4f( "u_ViewProjection", cObject_.camera.CalculateViewProjection( cObject_.transform.InverseTRS( ) ) );
-		colorMat_->SetMatrix4f( "u_ViewProjection", cObject_.camera.CalculateViewProjection( cObject_.transform.InverseTRS( ) ) );
-
-		phongMat_->SetMatrix4f( "u_Model", boxObject_.transform.TRS( ) );
-		phongMat_->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( boxObject_.transform.InverseTRS( ) ) ) );
-		phongMat_->SetVector4f( "u_Color", glm::vec4( 1.0f, 0.5f, 0.31f, 1.0f ) );
-		phongMat_->SetFloat( "u_AmbientStrength", 0.1f );
-		phongMat_->SetFloat( "u_SpecularStrength", 0.5f );
-		phongMat_->SetVector4f( "u_LightColor", lObject_.color );
-		phongMat_->SetVector3f( "u_LightPosition", lObject_.transform.Position );
-		phongMat_->SetVector3f( "u_ViewPosition", cObject_.transform.Position );
-		Graphics::DrawMesh( *boxObject_.mesh, *phongMat_ );
-
-		basicMat_->SetVector4f( "u_Color", lObject_.color );
-		basicMat_->SetMatrix4f( "u_Model", lObject_.transform.TRS( ) );
-		Graphics::DrawMesh( *lObject_.mesh, *basicMat_ );
-
-		DrawAxesLines( boxObject_.axes, boxObject_.transform.TRS( ) );
-		DrawAxesLines( lObject_.axes, lObject_.transform.TRS( ) );
+		cup_->GetComponent<MeshRenderer>( )->Material->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( cup_->GetTransform( )->InverseTRS( ) ) ) );
 	}
+
 };
 
 SET_ILLITHID_APPLICATION( TestApplication );

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "illithid/scene/Component.h"
+
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 
@@ -10,7 +12,7 @@ namespace itd
 		World, Local, Camera
 	};
 
-	class Transform
+	class Transform : public Component<Transform>
 	{
 	public:
 		glm::vec3 Position;
@@ -23,7 +25,11 @@ namespace itd
 		void Rotate( const glm::vec3& euler, TransformationSpace space = TransformationSpace::World );
 		void Scale( const glm::vec3& factor );
 
-		void Update( );
+		virtual void OnStart( ) override;
+		virtual void OnUpdate( ) override;
+		virtual void OnPreRender( ) override;
+		virtual void OnRender( ) override;
+		virtual void OnPostRender( ) override;
 
 		glm::vec3 Forward( ) const;
 		glm::vec3 Right( ) const;

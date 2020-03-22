@@ -55,7 +55,11 @@ namespace itd
 		ScaleFactor *= factor;
 	}
 
-	void Transform::Update( )
+	void Transform::OnStart( )
+	{
+	}
+
+	void Transform::OnUpdate( )
 	{
 		glm::mat4 translateMatrix = glm::mat4( 1.0f );
 		translateMatrix = glm::translate( translateMatrix, Position );
@@ -67,6 +71,18 @@ namespace itd
 
 		TRS_ = translateMatrix * rotateMatrix * scaleMatrix;
 		inverseTRS_ = glm::inverse( TRS_ );
+	}
+
+	void Transform::OnPreRender( )
+	{
+	}
+
+	void Transform::OnRender( )
+	{
+	}
+
+	void Transform::OnPostRender( )
+	{
 	}
 
 	glm::vec3 Transform::Forward( ) const

@@ -2,9 +2,12 @@
 #include "Camera.h"
 
 #include "glm/gtc/matrix_transform.hpp"
+#include "illithid/scene/GameObject.h"
 
 namespace itd
 {
+	std::shared_ptr<Camera> Camera::primaryCamera_;
+
 	Camera::Camera( )
 		:projectionMatrix_( glm::mat4( 1.0f ) )
 	{
@@ -20,8 +23,26 @@ namespace itd
 		projectionMatrix_ = glm::ortho<float_t>( projection.Left, projection.Right, projection.Top, projection.Bottom, projection.Near, projection.Far );
 	}
 
-	glm::mat4 Camera::CalculateViewProjection( const glm::mat4& viewMatrix )
+	glm::mat4 Camera::ViewProjection( )
 	{
-		return ( projectionMatrix_ * viewMatrix );
+		return ( projectionMatrix_ * gameObject_->GetTransform( )->InverseTRS( ) );
 	}
+
+
+	void Camera::OnStart( )
+	{
+	}
+	void Camera::OnUpdate( )
+	{
+	}
+	void Camera::OnPreRender( )
+	{
+	}
+	void Camera::OnRender( )
+	{
+	}
+	void Camera::OnPostRender( )
+	{
+	}
+
 }
