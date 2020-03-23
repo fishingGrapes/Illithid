@@ -28,7 +28,6 @@ namespace itd
 		return ( projectionMatrix_ * gameObject_->GetTransform( )->InverseTRS( ) );
 	}
 
-
 	void Camera::OnStart( )
 	{
 	}

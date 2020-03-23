@@ -1,5 +1,6 @@
 #pragma once
-#include"illithid/renderer/Material.h"
+#include "illithid/renderer/Material.h"
+#include "illithid/renderer/StaticMesh.h"
 
 namespace itd
 {
@@ -9,6 +10,8 @@ namespace itd
 		static void Initialize( );
 
 		static std::shared_ptr<Material> UnlitMaterial;
+		static std::shared_ptr<StaticMesh> CubeMesh;
+
 	};
 }
 

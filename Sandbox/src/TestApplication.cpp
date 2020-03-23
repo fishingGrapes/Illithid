@@ -38,7 +38,16 @@ private:
 	glm::vec2 mousePosition_;
 	glm::vec3 rotation_;
 
-	std::unique_ptr<GameObject> cup_, camera_, light_;
+	std::unique_ptr<GameObject> barrel_, camera_;
+	std::unique_ptr<GameObject>  dirLight_, spotLight_;
+	std::vector<std::unique_ptr<GameObject>> pointLights_;
+
+	std::vector<glm::vec3> pointLightPositions_ = {
+			glm::vec3( 0.7f,  0.2f,  2.0f ),
+			glm::vec3( 2.3f, -3.3f, -4.0f ),
+			glm::vec3( -4.0f,  2.0f, -12.0f ),
+			glm::vec3( 0.0f,  0.0f, -3.0f )
+	};
 
 public:
 
@@ -54,37 +63,31 @@ public:
 	// Inherited via Application
 	virtual void Start( ) override
 	{
-		Shader basicShader( "Assets/Shaders/basic.shader" );
-		std::shared_ptr<Material> basicMat_ = std::make_unique<Material>( basicShader );
-
 		Shader phongShader( "Assets/Shaders/phong.shader" );
 		std::shared_ptr<Material> phongMat_ = std::make_unique<Material>( phongShader );
 
-		cup_ = std::make_unique<GameObject>( );
-		auto cupRenderer = cup_->AddComponent<MeshRenderer>( );
-		cupRenderer->Mesh = StaticMesh::Load( "Assets/Models/cup.obj" );
-		cupRenderer->Material = phongMat_;
-		cupRenderer->Material->SetVector4f( "u_Color", glm::vec4( 1.0f, 0.5f, 0.31f, 1.0f ) );
-		cupRenderer->Material->SetFloat( "u_AmbientStrength", 0.1f );
-		cupRenderer->Material->SetFloat( "u_SpecularStrength", 0.5f );
+		std::shared_ptr<Texture2D> barrel_diffuse = Texture2D::Load( "Assets/Textures/barrel_diffuse.tex2D" );
+		std::shared_ptr<Texture2D> barrel_specular = Texture2D::Load( "Assets/Textures/barrel_specular.tex2D" );
+
+		barrel_ = std::make_unique<GameObject>( );
+		auto renderer = barrel_->AddComponent<MeshRenderer>( );
+		renderer->Mesh = StaticMesh::Load( "Assets/Models/barrel.obj" );
+		renderer->Material = phongMat_;
+		renderer->Material->SetTexture( "u_Material.diffuse", barrel_diffuse );
+		renderer->Material->SetTexture( "u_Material.specular", barrel_specular );
+		renderer->Material->SetFloat( "u_Material.shininess", 32.0f );
 
 		camera_ = std::make_unique<GameObject>( );
 		camera_->GetTransform( )->Translate( glm::vec3( 0.0f, 0.0f, 1.0f ) );
 		auto cam = camera_->AddComponent<Camera>( );
 		cam->SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
+		Camera::SetAsPrimary( cam );
 
-		light_ = std::make_unique<GameObject>( );
-		light_->GetTransform( )->Scale( glm::vec3( 0.25f ) );
-		auto lightComp = light_->AddComponent<Light>( );
-		lightComp->Color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
-		auto lightRenderer = light_->AddComponent<MeshRenderer>( );
-		lightRenderer->Mesh = StaticMesh::Load( "Assets/Models/box.obj" );
-		lightRenderer->Material = basicMat_;
-		lightRenderer->Material->SetVector4f( "u_Color", lightComp->Color );
-		cupRenderer->Material->SetVector4f( "u_LightColor", lightComp->Color );
+		CreateDirectionalLight( );
+		CreatePointLight( );
+		CreateSpotLight( );
 
 		mousePosition_ = glm::vec2( Screen::Width( ) * 0.5f, Screen::Height( ) * 0.5f );
-		Camera::SetAsPrimary( cam );
 	}
 
 	virtual void Shutdown( ) override
@@ -158,21 +161,90 @@ public:
 	// Inherited via Application
 	virtual void Update( ) override
 	{
-		float_t angle = Time::Elapsed( ) * 0.5f;
-		light_->GetTransform()->Position = glm::vec3( 2.0f * glm::cos( angle ), 0.0f, 2.0f * glm::sin( angle ) );
-
 		MoveCamera( );
+		spotLight_->GetTransform( )->Position = camera_->GetTransform( )->Position;
+		spotLight_->GetTransform( )->Orientation = camera_->GetTransform( )->Orientation;
 
-		auto cupRenderer = cup_->GetComponent<MeshRenderer>( );
+
+		auto cupRenderer = barrel_->GetComponent<MeshRenderer>( );
 		cupRenderer->Material->SetVector3f( "u_ViewPosition", camera_->GetTransform( )->Position );
-		cupRenderer->Material->SetVector3f( "u_LightPosition", light_->GetTransform( )->Position );
+		cupRenderer->Material->SetVector3f( "u_SpotLight.position", spotLight_->GetTransform( )->Position );
+		cupRenderer->Material->SetVector3f( "u_SpotLight.direction", spotLight_->GetTransform( )->Forward( ) );
+
 	}
 
 
 	// Inherited via Application
 	virtual void PreRender( ) override
 	{
-		cup_->GetComponent<MeshRenderer>( )->Material->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( cup_->GetTransform( )->InverseTRS( ) ) ) );
+		barrel_->GetComponent<MeshRenderer>( )->Material->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( barrel_->GetTransform( )->InverseTRS( ) ) ) );
+	}
+
+private:
+	void CreateDirectionalLight( )
+	{
+		dirLight_ = std::make_unique<GameObject>( );
+		auto lightComp = dirLight_->AddComponent<Light>( itd::LightType::Directional );
+		lightComp->Color = glm::vec4( 0.5f, 1.0f, 0.125f, 1.0f );
+
+		auto renderer = barrel_->GetComponent<MeshRenderer>( );
+		renderer->Material->SetVector3f( "u_DirectionalLight.direction", glm::vec3( -0.2f, -1.0f, -0.3f ) );
+
+		renderer->Material->SetVector3f( "u_DirectionalLight.ambient", 0.005f * lightComp->Color );
+		renderer->Material->SetVector3f( "u_DirectionalLight.diffuse", 0.4f * lightComp->Color );
+		renderer->Material->SetVector3f( "u_DirectionalLight.specular", 0.5f * lightComp->Color );
+	}
+
+	void CreatePointLight( )
+	{
+		Shader basicShader( "Assets/Shaders/color.shader" );
+		std::shared_ptr<Material> basicMat_ = std::make_unique<Material>( basicShader );
+
+		for (size_t i = 0; i < pointLightPositions_.size( ); ++i)
+		{
+			pointLights_.emplace_back( std::make_unique<GameObject>( ) );
+
+			pointLights_[ i ]->GetTransform( )->Translate( pointLightPositions_[ i ] );
+			pointLights_[ i ]->GetTransform( )->Scale( glm::vec3( 0.125f ) );
+
+			auto lightComp = pointLights_[ i ]->AddComponent<Light>( itd::LightType::Point );
+			lightComp->Color = glm::vec4( glm::linearRand( 0.0f, 1.0f ), glm::linearRand( 0.5f, 1.0f ), glm::linearRand( 0.0f, 1.0f ), 1.0f );
+
+			auto renderer = barrel_->GetComponent<MeshRenderer>( );
+			std::string uniform = "u_PointLights[" + std::to_string( i );
+
+			renderer->Material->SetVector3f( ( uniform + std::string( "].position" ) ).c_str( ), pointLightPositions_[ i ] );
+
+			renderer->Material->SetVector3f( ( uniform + std::string( "].ambient" ) ).c_str( ), 0.005f * lightComp->Color );
+			renderer->Material->SetVector3f( ( uniform + std::string( "].diffuse" ) ).c_str( ), 0.8f * lightComp->Color );
+			renderer->Material->SetVector3f( ( uniform + std::string( "].specular" ) ).c_str( ), 1.0f * lightComp->Color );
+
+			renderer->Material->SetFloat( ( uniform + std::string( "].constant" ) ).c_str( ), 1.0f );
+			renderer->Material->SetFloat( ( uniform + std::string( "].linear" ) ).c_str( ), 0.009f );
+			renderer->Material->SetFloat( ( uniform + std::string( "].quadratic" ) ).c_str( ), 0.032f );
+
+		}
+
+	}
+
+	void CreateSpotLight( )
+	{
+		spotLight_ = std::make_unique<GameObject>( );
+		auto lightComp = spotLight_->AddComponent<Light>( itd::LightType::Spot );
+		lightComp->Color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+
+		auto renderer = barrel_->GetComponent<MeshRenderer>( );
+
+		renderer->Material->SetVector3f( "u_SpotLight.ambient", glm::vec3( 0.0f ) );
+		renderer->Material->SetVector3f( "u_SpotLight.diffuse", glm::vec3( 1.0f ) );
+		renderer->Material->SetVector3f( "u_SpotLight.specular", glm::vec3( 1.0f ) );
+
+		renderer->Material->SetFloat( "u_SpotLight.constant", 1.0f );
+		renderer->Material->SetFloat( "u_SpotLight.linear", 0.009f );
+		renderer->Material->SetFloat( "u_SpotLight.quadratic", 0.032f );
+
+		renderer->Material->SetFloat( "u_SpotLight.innerCutoff", glm::cos( glm::radians( 12.5f ) ) );
+		renderer->Material->SetFloat( "u_SpotLight.outerCutoff", glm::cos( glm::radians( 15.0f ) ) );
 	}
 
 };

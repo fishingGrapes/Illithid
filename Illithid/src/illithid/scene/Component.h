@@ -30,7 +30,6 @@ namespace itd
 	template<typename T>
 	class Component : public ComponentBase
 	{
-		friend class Application;
 
 	public:
 		static const uint32_t ID;

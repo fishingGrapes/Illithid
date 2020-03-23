@@ -16,6 +16,7 @@
 #include "illithid/components/Light.h"
 
 #include "glm/glm.hpp"
+#include "glm/gtc/random.hpp"
 #include "glm/gtc/quaternion.hpp"
 #include "nlohmann/json.hpp"
 

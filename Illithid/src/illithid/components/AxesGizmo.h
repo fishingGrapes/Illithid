@@ -10,7 +10,6 @@ namespace itd
 	class AxesGizmo : public Component<AxesGizmo>
 	{
 	public:
-		// Inherited via Component
 		virtual void OnStart( ) override;
 		virtual void OnUpdate( ) override;
 		virtual void OnPreRender( ) override;
@@ -20,6 +19,5 @@ namespace itd
 	private:
 		std::array<std::unique_ptr<LineSegment>, 3> axes_;
 		std::array<glm::vec4, 3> colors_;
-
 	};
 }

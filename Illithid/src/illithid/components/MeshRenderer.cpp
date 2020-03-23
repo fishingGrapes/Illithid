@@ -4,6 +4,7 @@
 #include "illithid/renderer/Graphics.h"
 #include "illithid/scene/GameObject.h"
 #include "illithid/components/Camera.h"
+#include "illithid/components/Light.h"
 
 namespace itd
 {
@@ -22,9 +23,11 @@ namespace itd
 	void MeshRenderer::OnStart( )
 	{
 	}
+
 	void MeshRenderer::OnUpdate( )
 	{
 	}
+
 	void MeshRenderer::OnPostRender( )
 	{
 	}

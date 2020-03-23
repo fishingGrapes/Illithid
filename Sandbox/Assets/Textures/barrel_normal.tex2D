@@ -1,8 +1,8 @@
 {
-	"path" : "Assets/Raw/Textures/concrete.png",
+	"path" : "Assets/Raw/Textures/barrel_normal.tga",
 	"wrap_mode_s" : "repeat",
 	"wrap_mode_t" : "repeat",
 	"min_filter_mode" : "linear_mipmap_linear",
 	"mag_filter_mode" : "linear",
-	"texture_format" : "RGBA8"
+	"texture_format" : "RGB8"
 }
