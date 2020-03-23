@@ -1,16 +1,23 @@
 #include "ilpch.h"
 #include "StaticMesh.h"
 
-#include "illithid\core\Log.h"
+#include "illithid/core/Log.h"
 #include "glad/glad.h"
+#include "illithid/core/FileSystem.h"
 
 #include "tiny_obj_loader.h"
+
+#include "assimp/Importer.hpp"
+#include "assimp/scene.h"
+#include "assimp/postprocess.h"
 
 namespace itd
 {
 	StaticMesh::StaticMesh( std::vector<Vertex>&& vertices )
 		: VAO_( 0 ), VBO_( 0 ), vertices_( std::move( vertices ) )
 	{
+
+
 		this->CreateVertexArrayObject( );
 	}
 
@@ -53,6 +60,10 @@ namespace itd
 
 	std::shared_ptr<StaticMesh> StaticMesh::Load( const std::string& path )
 	{
+		Assimp::Importer importer;
+		const aiScene* scene = importer.ReadFile( FileSystem::GetAbsolutePath( path ), aiProcess_Triangulate | aiProcess_FlipUVs );
+		delete scene;
+
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;

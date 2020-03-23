@@ -26,11 +26,13 @@ IncludeDir["glm"] = "Illithid/vendor/glm"
 IncludeDir["json"] = "Illithid/vendor/json/single_include"
 IncludeDir["stb"] = "Illithid/vendor/stb"
 IncludeDir["tinyobjloader"] = "Illithid/vendor/tinyobjloader"
+IncludeDir["assimp"] = "Illithid/vendor/assimp/include"
 
 
 group "dependencies"
 	include ("Illithid/vendor/GLFW")
 	include ("Illithid/vendor/GLAD")
+	include ("Illithid/vendor/assimp")
 group ""
 
 project "Illithid"
@@ -64,13 +66,15 @@ project "Illithid"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.json}",
 		"%{IncludeDir.stb}",
-		"%{IncludeDir.tinyobjloader}"
+		"%{IncludeDir.tinyobjloader}",
+		"%{IncludeDir.assimp}"
 	}
 
 	links
 	{
 		"GLFW",
 		"GLAD",
+		"assimp",
 		"opengl32.lib"
 	}
 
