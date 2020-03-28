@@ -6,10 +6,8 @@
 #include "illithid/core/FileSystem.h"
 
 #include "tiny_obj_loader.h"
+#include "tiny_gltf.h"
 
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
-#include "assimp/postprocess.h"
 
 namespace itd
 {
@@ -57,13 +55,39 @@ namespace itd
 		glBindVertexArray( VAO_ );
 	}
 
+	std::shared_ptr<StaticMesh> StaticMesh::LoadGLTF( const std::string& path )
+	{
+		using namespace tinygltf;
+
+		Model model;
+		TinyGLTF loader;
+		std::string warning, error;
+
+		bool success = loader.LoadASCIIFromFile( &model, &error, &warning, path.c_str( ) );
+
+		if (!warning.empty( ))
+		{
+			IL_CORE_WARN( warning );
+		}
+
+		if (!error.empty( ))
+		{
+			IL_CORE_ERROR( error );
+		}
+
+		if (!success)
+		{
+			IL_CORE_ERROR( "TinyGLTF failed to load mesh {0}", path );
+			return std::shared_ptr<StaticMesh>( );
+		}
+
+
+		std::shared_ptr<StaticMesh> mesh = std::make_shared<StaticMesh>( std::move( vertices ) );
+		return mesh;
+	}
 
 	std::shared_ptr<StaticMesh> StaticMesh::Load( const std::string& path )
 	{
-		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile( FileSystem::GetAbsolutePath( path ), aiProcess_Triangulate | aiProcess_FlipUVs );
-		delete scene;
-
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
