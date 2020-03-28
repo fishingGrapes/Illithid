@@ -55,6 +55,21 @@ namespace itd
 		ScaleFactor *= factor;
 	}
 
+	glm::vec3 Transform::Forward( ) const
+	{
+		return Orientation * glm::vec3( 0.0f, 0.0f, -1.0f );
+	}
+
+	glm::vec3 Transform::Right( ) const
+	{
+		return Orientation * glm::vec3( 1.0f, 0.0f, 0.0f );
+	}
+
+	glm::vec3 Transform::Up( ) const
+	{
+		return Orientation * glm::vec3( 0.0f, 1.0f, 0.0f );
+	}
+
 	void Transform::OnStart( )
 	{
 	}
@@ -84,21 +99,5 @@ namespace itd
 	void Transform::OnPostRender( )
 	{
 	}
-
-	glm::vec3 Transform::Forward( ) const
-	{
-		return Orientation * glm::vec3( 0.0f, 0.0f, -1.0f );
-	}
-
-	glm::vec3 Transform::Right( ) const
-	{
-		return Orientation * glm::vec3( 1.0f, 0.0f, 0.0f );
-	}
-
-	glm::vec3 Transform::Up( ) const
-	{
-		return Orientation * glm::vec3( 0.0f, 1.0f, 0.0f );
-	}
-
 
 }

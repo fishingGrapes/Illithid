@@ -26,6 +26,7 @@ IncludeDir["glm"] = "Illithid/vendor/glm"
 IncludeDir["json"] = "Illithid/vendor/json/single_include"
 IncludeDir["stb"] = "Illithid/vendor/stb"
 IncludeDir["tinyobjloader"] = "Illithid/vendor/tinyobjloader"
+IncludeDir["tinygltf"] = "Illithid/vendor/tinygltf"
 IncludeDir["assimp"] = "Illithid/vendor/assimp/include"
 
 
@@ -67,6 +68,7 @@ project "Illithid"
 		"%{IncludeDir.json}",
 		"%{IncludeDir.stb}",
 		"%{IncludeDir.tinyobjloader}",
+		"%{IncludeDir.tinygltf}",
 		"%{IncludeDir.assimp}"
 	}
 

@@ -22,3 +22,6 @@
 [submodule "Illithid/vendor/assimp"]
 	path = Illithid/vendor/assimp
 	url = https://github.com/fishingGrapes/assimp.git
+[submodule "Illithid/vendor/tinygltf"]
+	path = Illithid/vendor/tinygltf
+	url = https://github.com/fishingGrapes/tinygltf.git
