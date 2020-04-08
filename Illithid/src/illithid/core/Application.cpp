@@ -11,6 +11,7 @@
 #include "illithid/renderer/Graphics.h"
 #include "illithid/scene/SceneGraph.h"
 #include "Resources.h"
+#include "illithid/imgui/Gui.h"
 
 namespace itd
 {
@@ -60,6 +61,10 @@ namespace itd
 			SceneGraph::Render( );
 			SceneGraph::PostRender( );
 
+			Gui::Begin( );
+			//GUI Layer Code Here
+			Gui::End( window_ );
+
 			window_->SwapBuffers( );
 			window_->PollEvents( );
 
@@ -85,7 +90,7 @@ namespace itd
 
 		FileSystem::Initialize( );
 
-		window_ = std::make_unique<Window>( WindowProperties( "GL", 1920, 1080 ) );
+		window_ = std::make_unique<Window>( WindowProperties( "GL", 1280, 720 ) );
 		window_->SetEventListener( BIND_EVENT_FUNCTION( Application::OnEvent, this ) );
 
 		Screen::width_ = window_->Width( );
@@ -95,11 +100,13 @@ namespace itd
 		Input::Initialize( );
 
 		Resources::Initialize( );
+		Gui::Initialize( window_ );
 	}
 
 	void Application::Destroy( )
 	{
 		Input::Destroy( );
+		Gui::Destroy( );
 	}
 
 	bool Application::OnWindowClosed( WindowClosedEvent& event )

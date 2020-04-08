@@ -22,3 +22,7 @@
 [submodule "Illithid/vendor/tinygltf"]
 	path = Illithid/vendor/tinygltf
 	url = https://github.com/fishingGrapes/tinygltf.git
+[submodule "Illithid/vendor/imgui"]
+	path = Illithid/vendor/imgui
+	url = https://github.com/fishingGrapes/imgui.git
+	branch = docking

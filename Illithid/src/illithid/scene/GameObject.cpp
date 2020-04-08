@@ -11,7 +11,7 @@ namespace itd
 		transform_ = this->AddComponent<Transform>( );
 
 #if defined(IL_DEBUG) || defined(IL_RELEASE)
-		this->AddComponent<AxesGizmo>( );
+		auto& gizmo =  this->AddComponent<AxesGizmo>( );
 #endif
 
 		SceneGraph::Add( this );

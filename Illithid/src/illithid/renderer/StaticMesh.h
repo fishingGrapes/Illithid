@@ -23,7 +23,6 @@ namespace itd
 		StaticMesh& operator=( const StaticMesh& other ) = delete;
 
 		static std::shared_ptr<StaticMesh> Load( const std::string& path );
-		static std::shared_ptr<StaticMesh> LoadGLTF( const std::string& path );
 
 	private:
 		uint32_t VAO_, VBO_;

@@ -57,6 +57,12 @@ namespace itd
 		}
 
 		template<typename T>
+		bool HasComponent( )
+		{
+			return componentFilter_[ T::ID ];
+		}
+
+		template<typename T>
 		void RemoveComponent( )
 		{
 			if (!componentFilter_[ T::ID ])
