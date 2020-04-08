@@ -43,3 +43,6 @@ Sandbox/Assets/Models/
 *.vcxproj
 *.filters
 *.user
+
+#runtime gui config
+Sandbox/imgui.ini
