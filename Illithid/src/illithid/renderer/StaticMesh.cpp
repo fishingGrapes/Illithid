@@ -14,8 +14,6 @@ namespace itd
 	StaticMesh::StaticMesh( std::vector<Vertex>&& vertices )
 		: VAO_( 0 ), VBO_( 0 ), vertices_( std::move( vertices ) )
 	{
-
-
 		this->CreateVertexArrayObject( );
 	}
 

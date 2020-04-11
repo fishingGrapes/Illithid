@@ -73,7 +73,7 @@ public:
 
 		barrel_ = std::make_unique<GameObject>( );
 		auto renderer = barrel_->AddComponent<MeshRenderer>( );
-		renderer->Mesh = StaticMesh::Load( "Assets/Models/barrel.obj" );
+		renderer->Mesh = StaticMesh::Load( "Assets/Models/sphere.obj" );
 		renderer->Material = phongMat_;
 		renderer->Material->SetTexture( "u_Material.diffuse", barrel_diffuse );
 		renderer->Material->SetTexture( "u_Material.specular", barrel_specular );

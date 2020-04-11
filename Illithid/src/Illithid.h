@@ -26,4 +26,7 @@
 #include "illithid/components/MeshRenderer.h"
 #include "illithid/components/Transform.h"
 
+#include "illithid/utils/Array3D.h"
+#include "illithid/memory/PoolAllocator.h"
+
 #include "illithid/core/LogExtensions.h"
