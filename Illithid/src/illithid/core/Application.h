@@ -27,6 +27,7 @@ namespace itd
 	private:
 		void Initialize( );
 		void Destroy( );
+		void RegisterEngineComponents( );
 		bool OnWindowClosed( WindowClosedEvent& event );
 		bool OnWindowResized( WindowResizedEvent& event );
 

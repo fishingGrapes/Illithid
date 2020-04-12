@@ -47,7 +47,6 @@ class TestApplication : public itd::Application
 {
 
 private:
-	PoolAllocator<Pack> packAlloc_;
 
 public:
 
@@ -62,22 +61,18 @@ public:
 	// Inherited via Application
 	virtual void Start( ) override
 	{
-		std::vector<std::shared_ptr<Pack>> packs_;
+		PoolAllocator<Pack, 3> packAlloc_;
 
+		std::vector< ptr_ref<Pack>> packs_;
 		{
-			for (size_t i = 0; i < 8; i++)
+			for (size_t i = 0; i < 7; i++)
 			{
-				packs_.push_back( packAlloc_.make_shared( static_cast<int32_t>( i + 1 ), static_cast<int16_t>( ( i + 1 ) * 10 ) ) );
+				packs_.push_back( packAlloc_.instantiate( static_cast<int32_t>( 1 + i ), static_cast<int16_t>( ( 1 + i ) * 10 ) ) );
 			}
-			IL_TRACE( "Size: {0}", packAlloc_.size( ) );
-
-			packAlloc_.release( packs_[ 2 ] );
-			packs_[ 2 ] = packAlloc_.make_shared( 1, 10 );
-
-			IL_TRACE( "Size: {0}", packAlloc_.size( ) );
 		}
 
-
+		packAlloc_.release( packs_[ 3 ] );
+		packAlloc_.instantiate( 111, 111 );
 	}
 
 	virtual void Shutdown( ) override

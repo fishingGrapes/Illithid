@@ -13,6 +13,14 @@
 #include "Resources.h"
 #include "illithid/imgui/Gui.h"
 
+#include "illithid/scene/GameObject.h"
+#include "illithid/components/Transform.h"
+#include "illithid/components/Camera.h"
+#include "illithid/components/AxesGizmo.h"
+#include "illithid/components/Light.h"
+#include "illithid/components/MeshRenderer.h"
+
+
 namespace itd
 {
 	float_t Time::elapsed_ = 0.0f;
@@ -40,6 +48,7 @@ namespace itd
 		TimePoint previousTime = startTime;
 		TimePoint currentTime;
 
+		this->RegisterEngineComponents( );
 		this->Start( );
 		Graphics::EnableCapabality( Capability::Cap_DepthTest );
 
@@ -107,6 +116,17 @@ namespace itd
 	{
 		Input::Destroy( );
 		Gui::Destroy( );
+	}
+
+	void Application::RegisterEngineComponents( )
+	{
+		BEGIN_COMPONENT_REGISTRATION( );
+		REGISTER_COMPONENT( Transform );
+		REGISTER_COMPONENT( AxesGizmo );
+		REGISTER_COMPONENT( Camera );
+		REGISTER_COMPONENT( Light );
+		REGISTER_COMPONENT( MeshRenderer );
+		END_COMPONENT_REGISTRATION( );
 	}
 
 	bool Application::OnWindowClosed( WindowClosedEvent& event )

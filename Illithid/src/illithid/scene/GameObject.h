@@ -21,6 +21,8 @@ namespace itd
 
 	public:
 		GameObject( );
+
+		//TODO: Disable all components on Destruction
 		~GameObject( );
 
 		template<typename T, typename... params>
@@ -29,7 +31,7 @@ namespace itd
 			if (componentFilter_[ T::ID ])
 			{
 				IL_CORE_WARN( "Trying to add Component_{0} that already exists in the current GameObject.", T::ID );
-				return nullptr;
+				return  nullptr;
 			}
 
 			std::shared_ptr<T> t = std::make_shared<T>( std::forward<params>( args )... );
@@ -62,7 +64,7 @@ namespace itd
 			return componentFilter_[ T::ID ];
 		}
 
-		template<typename T>
+		/*template<typename T>
 		void RemoveComponent( )
 		{
 			if (!componentFilter_[ T::ID ])
@@ -81,7 +83,7 @@ namespace itd
 
 			componentMap_.erase( T::ID );
 			componentFilter_.set( T::ID, 0 );
-		}
+		}*/
 
 		inline std::shared_ptr<Transform> GetTransform( ) const
 		{
@@ -92,7 +94,6 @@ namespace itd
 		std::vector<std::shared_ptr<ComponentBase>> components_;
 		ComponentFilter componentFilter_;
 		std::unordered_map<uint32_t, std::shared_ptr<ComponentBase>> componentMap_;
-
 		std::shared_ptr<Transform> transform_;
 
 		friend class SceneGraph;
@@ -101,5 +102,10 @@ namespace itd
 		void PreRender( );
 		void Render( );
 		void PostRender( );
+
 	};
 }
+
+#define BEGIN_COMPONENT_REGISTRATION() GameObject* _go = new GameObject()
+#define REGISTER_COMPONENT(x) _go->AddComponent<x>()
+#define END_COMPONENT_REGISTRATION() delete _go;

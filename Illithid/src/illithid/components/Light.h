@@ -15,8 +15,8 @@ namespace itd
 	{
 	public:
 
-		explicit Light( LightType type ) 
-			: Type( type )
+		Light( LightType type = LightType::Directional )
+			: Type( type ), Color( glm::vec4( 1.0f ) )
 		{
 
 		}

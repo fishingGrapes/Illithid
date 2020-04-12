@@ -33,6 +33,13 @@ namespace itd
 
 	public:
 		static const uint32_t ID;
+
+		Component( )
+			:Enabled( true )
+		{
+
+		}
+
 		virtual ~Component( )
 		{
 
@@ -44,6 +51,14 @@ namespace itd
 		virtual void OnRender( ) = 0;
 		virtual void OnPostRender( ) = 0;
 
+		bool Enabled;
+
+		/*template<typename... params>
+		static std::shared_ptr<T> Instantiate( params... args )
+		{
+			return allocator_.make_shared( std::forward<params>( args )... );
+		}*/
+
 	protected:
 		GameObject* gameObject_;
 
@@ -53,7 +68,12 @@ namespace itd
 		{
 			gameObject_ = object;
 		}
+
+		//static GrowingAllocator<T> allocator_;
 	};
+
+	/*template<typename T>
+	GrowingAllocator<T> Component<T>::allocator_;*/
 
 	template<typename T>
 	const uint32_t Component<T>::ID( ComponentBase::RegisterComponent( ) );

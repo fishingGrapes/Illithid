@@ -1,74 +1,134 @@
 #pragma once
 #include <utility>
+#include "illithid/core/Log.h"
+
 
 template <typename T>
-class Ptr_Ref
+class ptr_ref
 {
+	using Deleter = std::function<void( T* )>;
+
 public:
 
-	Ptr_Ref( )
-		: refCount_( nullptr ), data_( nullptr )
+	ptr_ref( )
+		: refCount_( nullptr ), data_( nullptr ), valid_( nullptr ), deleter_( nullptr )
 	{
 	}
 
-	Ptr_Ref( const Ptr_Ref& other )
-		: refCount_( other.refCount_ ), data_( other.data_ )
+	ptr_ref( T* ptr, const Deleter& deleter = nullptr )
+		: refCount_( new size_t( 1 ) ), data_( ptr ), valid_( new bool( true ) ), deleter_( deleter )
+	{
+	}
+
+	ptr_ref( const ptr_ref& other )
+		: refCount_( other.refCount_ ), data_( other.data_ ), valid_( other.valid_ ), deleter_( other.deleter_ )
 	{
 		++( *refCount_ );
 	}
 
-	Ptr_Ref( Ptr_Ref&& other )
-		: refCount_( other.refCount_ ), data_( other.data_ )
+	ptr_ref( ptr_ref&& other )
+		: refCount_( other.refCount_ ), data_( other.data_ ), valid_( other.valid_ ), deleter_( other.deleter_ )
 	{
 		other.data_ = nullptr;
 		other.refCount_ = nullptr;
+		other.valid_ = nullptr;
+		other.deleter_ = nullptr;
 	}
 
-	Ptr_Ref& operator=( const Ptr_Ref& other )
+	ptr_ref& operator=( const ptr_ref& other )
 	{
 		this->refCount_ = other.refCount_;
 		this->data_ = other.data_;
+		this->valid_ = other.valid_;
+		this->deleter_ = other.deleter_;
 
 		++( *refCount_ );
+
 		return *this;
 	}
 
-	Ptr_Ref& operator=( Ptr_Ref&& other )
+	ptr_ref& operator=( ptr_ref&& other )
 	{
 		this->refCount_ = other.refCount_;
 		this->data_ = other.data_;
+		this->valid_ = other.valid_;
+		this->deleter_ = other.deleter_;
 
 		other.data_ = nullptr;
 		other.refCount_ = nullptr;
+		other.valid_ = nullptr;
+		other.deleter_ = nullptr;
+
 		return *this;
 	}
 
-	void Reset( )
+	~ptr_ref( )
 	{
-		if (refCount_)
+		if (valid_)
+		{
+			--( *refCount_ );
+
+			if (*refCount_ <= 0)
+			{
+				if (*valid_)
+				{
+					if (deleter_)
+						deleter_( data_ );
+					else
+						delete data_;
+				}
+
+				delete refCount_;
+				delete valid_;
+
+				data_ = nullptr;
+				refCount_ = nullptr;
+				valid_ = nullptr;
+			}
+		}
+	}
+
+	//decreases the refcount by 1
+	void reset( )
+	{
+		if (valid_)
 		{
 			--( *refCount );
 
 			if (*refCount_ <= 0)
 			{
-				delete data_;
-				delete refCount_;;
+				if (*valid_)
+				{
+					if (deleter_)
+						deleter_( data_ );
+					else
+						delete data_;
+				}
+
+				delete refCount_;
+				delete valid_;
 			}
 
 			refCount_ = nullptr;
 			data_ = nullptr;
+			valid_ = nullptr;
 		}
 	}
 
-	template <typename... Args>
-	static Ptr_Ref<T> make( Args&& ...args )
+	inline T* get( ) const
 	{
-		Ptr_Ref<T> ptr;
+		return data_;
+	}
 
-		ptr.refCount_ = new size_t( 1 );
-		ptr.data_ = new T( std::forward<Args>( args )... );
+	inline size_t ref_count( ) const
+	{
+		return *refCount_;
+	}
 
-		return ptr;
+	//whether pointing to a valid memory location
+	inline bool is_valid( ) const
+	{
+		return *valid_;
 	}
 
 	T* operator->( ) const
@@ -81,35 +141,37 @@ public:
 		return *data_;
 	}
 
-	bool operator==( const Ptr_Ref& other ) const
+	bool operator==( const ptr_ref& other ) const
 	{
 		return data_ == other.data_;
 	}
 
-	bool operator!=( const Ptr_Ref& other ) const
+	bool operator!=( const ptr_ref& other ) const
 	{
 		return data_ != other.data_;
 	}
 
-	virtual ~Ptr_Ref( )
+	template <typename... params >
+	static ptr_ref<T> make( params&& ...args )
 	{
-		if (refCount_)
-		{
-			--( *refCount_ );
+		ptr_ref<T> ref;
 
-			if (*refCount_ <= 0)
-			{
-				delete data_;
-				delete refCount_;
+		ref.refCount_ = new size_t( 1 );
+		ref.data_ = new T( std::forward<params>( args )... );
+		ref.valid_ = new bool( true );
 
-				data_ = nullptr;
-				refCount_ = nullptr;
-			}
-		}
+		return ref;
+	}
+
+	void invalidate_peers( )
+	{
+		*valid_ = false;
 	}
 
 protected:
 	size_t* refCount_;
+	bool* valid_;
 	T* data_;
-
+	Deleter deleter_;
 };
+

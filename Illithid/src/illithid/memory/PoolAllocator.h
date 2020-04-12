@@ -1,164 +1,140 @@
 #pragma once
-#include <memory>
-#include <unordered_map>
 #include <list>
-#include <utility>
-#include "illithid/core/Log.h"
+#include <unordered_map>
+#include <set>
+#include "illithid/utils/ptr_ref.h"
 
-
-template <typename T>
-class PoolAllocator
+template <typename T, size_t BLOCK_SIZE>
+struct Chunk
 {
 public:
-	PoolAllocator( size_t initial_capacity = 8 )
-		:capacity_( initial_capacity ), size_( 0 )
+
+	explicit Chunk( size_t priority )
+		: buffer_( reinterpret_cast<T*>( malloc( BLOCK_SIZE * sizeof( T ) ) ) ), size_( 0 ), priority_( priority )
 	{
-		buffer_ = reinterpret_cast<T*>( malloc( initial_capacity * sizeof( T ) ) );
-		deleter_ = [ this ] ( T* ptr )
-		{
-			release( ptr );
-		};
 	}
 
-	~PoolAllocator( )
+	~Chunk( )
 	{
-		if (validityMap_.size( ) > 0)
+		for (size_t i = 0; i < size_; ++i)
 		{
-			DestroyElements( );
+			( buffer_ + i )->~T( );
 		}
+
 		free( buffer_ );
-
 		buffer_ = nullptr;
-		size_ = capacity_ = 0;
 	}
 
-	void set_custom_deleter( std::function<void( T* )> deleter )
+	inline bool is_full( ) const
 	{
-		deleter_ = deleter;
+		return  size_ == BLOCK_SIZE;
 	}
 
-	template <typename... Args>
-	inline std::shared_ptr<T> make_shared( Args&& ...args )
-	{
-		T* ptr = FindFreeMemory( );
-		++size_;
-
-		return std::shared_ptr<T>( new( ptr ) T( std::forward<Args>( args )... ), deleter_ );
-	}
-
-	void release( std::shared_ptr<T>& sptr )
-	{
-		release( sptr.get( ) );
-		sptr.reset( );
-	}
-
-	template <typename... Args>
-	inline T* make_raw( Args&& ...args )
-	{
-		T* ptr = FindFreeMemory( );
-		++size_;
-
-		return ( new( ptr ) T( std::forward<Args>( args )... ) );
-	}
-
-	void release( T* ptr )
-	{
-		size_t index = static_cast<size_t>( ptr - buffer_ );
-
-		if (validityMap_[ index ])
-		{
-			validityMap_[ index ] = false;
-			freeList_.push_back( index );
-			--size_;
-
-			ptr->~T( );
-		}
-	}
-
-	inline size_t size( ) const
+	inline bool size( ) const
 	{
 		return size_;
 	}
 
-	inline size_t capacity( ) const
+	inline bool priority( ) const
 	{
-		return capacity_;
+		return priority_;
 	}
 
-	inline T* data( ) const
+	T* get_pointer( )
 	{
-		return buffer_;
+		T* ptr = ( buffer_ + size_ );
+		++size_;
+		return ptr;
 	}
 
-	inline bool is_valid( T* ptr ) const
+	void release( T* ptr )
 	{
-		return ( validityMap_[ static_cast<size_t>( ptr - buffer_ ) ] );
-	}
+		ptr->~T( );
 
-	void DebugValidity( )
-	{
-		for (size_t i = 0; i < size_; ++i)
+		void* last = reinterpret_cast<void*>( buffer_ + ( size_ - 1 ) );
+		void* current = reinterpret_cast<void*>( ptr );
+		if (last != current)
 		{
-			//Destroy only if the memory contains a valid object of type T
-			if (validityMap_[ i ])
-			{
-				IL_CORE_TRACE( "valid: {0}", (void*) ( buffer_ + i ) );
-			}
-			else
-			{
-				IL_CORE_TRACE( "Invalid: {0}", (void*) ( buffer_ + i ) );
-			}
+			memcpy( current, last, sizeof( T ) );
 		}
+
+		--size_;
+	}
+
+	inline bool operator<( const Chunk& other ) const
+	{
+		return priority_ < other.priority;
 	}
 
 private:
 	T* buffer_;
-	size_t size_, capacity_;
-	std::unordered_map<size_t, bool> validityMap_;
-	std::list<size_t> freeList_;
+	size_t size_, priority_;
+};
 
-	std::function<void( T* )> deleter_;
+template <typename T, size_t BLOCK_SIZE>
+class PoolAllocator
+{
+	using TChunk = Chunk<T, BLOCK_SIZE>;
 
-	void DestroyElements( )
+public:
+
+	~PoolAllocator( )
 	{
-		for (size_t i = 0; i < size_; ++i)
+		freeChunks_.clear( );
+		for each (TChunk * chunk in chunks_)
 		{
-			//Destroy only if the memory contains a valid object of type T
-			if (validityMap_[ i ])
-			{
-				( buffer_ + i )->~T( );
-			}
+			delete chunk;
 		}
+		chunks_.clear( );
+		memoryMap_.clear( );
 	}
 
-	T* FindFreeMemory( )
+	template <typename... params>
+	ptr_ref<T> instantiate( params&& ...args )
 	{
-		size_t index = 0;
-
-		//free fragmented memory available
-		if (freeList_.size( ) > 0)
+		if (freeChunks_.empty( ))
 		{
-			index = freeList_.front( );
-			freeList_.pop_front( );
-		}
-		else
-		{
-			//Not enough memory already available in the buffer
-			if (size_ == capacity_)
-			{
-				capacity_ *= 2;
-
-				T* temp_buffer = reinterpret_cast<T*>( malloc( capacity_ * sizeof( T ) ) );
-				memcpy( temp_buffer, buffer_, size_ * sizeof( T ) );
-				DestroyElements( );
-				free( buffer_ );
-				buffer_ = temp_buffer;
-			}
-
-			index = size_;
+			TChunk* chunk = new TChunk( chunks_.size( ) );
+			chunks_.push_back( chunk );
+			freeChunks_.insert( chunk );
 		}
 
-		validityMap_[ index ] = true;
-		return ( buffer_ + index );
+		TChunk* chunk = *( freeChunks_.begin( ) );
+		T* ptr = chunk->get_pointer( );
+		memoryMap_[ ptr ] = chunk;
+
+		//If there is no more memory in the chunk, remove it from the free list
+		if (chunk->is_full( ))
+		{
+			freeChunks_.erase( chunk );
+		}
+
+		return ptr_ref<T>( new( ptr ) T( std::forward<params>( args )... ), [ this ] ( T* ptr )
+		{
+			this->release( ptr );
+		} );
 	}
+
+	void release( T* ptr )
+	{
+		TChunk* chunk = memoryMap_[ ptr ];
+		chunk->release( ptr );
+		freeChunks_.insert( chunk );
+	}
+
+
+	void release( ptr_ref<T> ref )
+	{
+		TChunk* chunk = memoryMap_[ ref.get( ) ];
+		chunk->release( ref.get( ) );
+		freeChunks_.insert( chunk );
+
+		ref.invalidate_peers( );
+	}
+
+
+private:
+	std::vector<TChunk*> chunks_;
+	std::unordered_map<T*, TChunk*> memoryMap_;
+	std::set<TChunk*> freeChunks_;
 };

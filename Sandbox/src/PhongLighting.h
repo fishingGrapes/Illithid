@@ -73,11 +73,12 @@ public:
 
 		barrel_ = std::make_unique<GameObject>( );
 		auto renderer = barrel_->AddComponent<MeshRenderer>( );
-		renderer->Mesh = StaticMesh::Load( "Assets/Models/sphere.obj" );
+		renderer->Mesh = StaticMesh::Load( "Assets/Models/box.obj" );
 		renderer->Material = phongMat_;
 		renderer->Material->SetTexture( "u_Material.diffuse", barrel_diffuse );
 		renderer->Material->SetTexture( "u_Material.specular", barrel_specular );
 		renderer->Material->SetFloat( "u_Material.shininess", 32.0f );
+		barrel_->GetTransform( )->Translate( glm::vec3( 1.0f, 0.0f, 0.0f ) );
 
 		camera_ = std::make_unique<GameObject>( );
 		camera_->GetTransform( )->Translate( glm::vec3( 0.0f, 0.0f, 1.0f ) );
@@ -163,6 +164,8 @@ public:
 	// Inherited via Application
 	virtual void Update( ) override
 	{
+		barrel_->GetTransform( )->Rotate( glm::vec3( 0, 0.01f, 0 ), itd::TransformationSpace::Local );
+
 		MoveCamera( );
 		spotLight_->GetTransform( )->Position = camera_->GetTransform( )->Position;
 		spotLight_->GetTransform( )->Orientation = camera_->GetTransform( )->Orientation;
@@ -172,7 +175,6 @@ public:
 		cupRenderer->Material->SetVector3f( "u_ViewPosition", camera_->GetTransform( )->Position );
 		cupRenderer->Material->SetVector3f( "u_SpotLight.position", spotLight_->GetTransform( )->Position );
 		cupRenderer->Material->SetVector3f( "u_SpotLight.direction", spotLight_->GetTransform( )->Forward( ) );
-
 	}
 
 
