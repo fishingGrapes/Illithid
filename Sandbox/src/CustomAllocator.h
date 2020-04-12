@@ -72,7 +72,9 @@ public:
 		}
 
 		packAlloc_.release( packs_[ 3 ] );
-		packAlloc_.instantiate( 111, 111 );
+		packs_[ 3 ] = packAlloc_.instantiate( 111, 111 );
+		IL_TRACE( "{0}  {1}", packAlloc_[ 3 ]->value1, packAlloc_[ 5 ]->value1 );
+
 	}
 
 	virtual void Shutdown( ) override

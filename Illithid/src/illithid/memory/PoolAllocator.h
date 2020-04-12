@@ -10,8 +10,9 @@ struct Chunk
 public:
 
 	explicit Chunk( size_t priority )
-		: buffer_( reinterpret_cast<T*>( malloc( BLOCK_SIZE * sizeof( T ) ) ) ), size_( 0 ), priority_( priority )
+		: priority_( priority ), buffer_( nullptr ), size_( 0 )
 	{
+		buffer_ = reinterpret_cast<T*>( malloc( BLOCK_SIZE * sizeof( T ) ) );
 	}
 
 	~Chunk( )
@@ -35,16 +36,21 @@ public:
 		return size_;
 	}
 
-	inline bool priority( ) const
+	inline size_t priority( ) const
 	{
 		return priority_;
 	}
 
-	T* get_pointer( )
+	T* allocate( )
 	{
 		T* ptr = ( buffer_ + size_ );
 		++size_;
 		return ptr;
+	}
+
+	T* get_pointer_at( size_t index )
+	{
+		return ( buffer_ + index );
 	}
 
 	void release( T* ptr )
@@ -61,11 +67,6 @@ public:
 		--size_;
 	}
 
-	inline bool operator<( const Chunk& other ) const
-	{
-		return priority_ < other.priority;
-	}
-
 private:
 	T* buffer_;
 	size_t size_, priority_;
@@ -77,6 +78,11 @@ class PoolAllocator
 	using TChunk = Chunk<T, BLOCK_SIZE>;
 
 public:
+	PoolAllocator( )
+		:size_( 0 )
+	{
+
+	}
 
 	~PoolAllocator( )
 	{
@@ -100,7 +106,7 @@ public:
 		}
 
 		TChunk* chunk = *( freeChunks_.begin( ) );
-		T* ptr = chunk->get_pointer( );
+		T* ptr = chunk->allocate( );
 		memoryMap_[ ptr ] = chunk;
 
 		//If there is no more memory in the chunk, remove it from the free list
@@ -113,6 +119,8 @@ public:
 		{
 			this->release( ptr );
 		} );
+
+		++size_;
 	}
 
 	void release( T* ptr )
@@ -120,6 +128,8 @@ public:
 		TChunk* chunk = memoryMap_[ ptr ];
 		chunk->release( ptr );
 		freeChunks_.insert( chunk );
+
+		--size_;
 	}
 
 
@@ -130,11 +140,35 @@ public:
 		freeChunks_.insert( chunk );
 
 		ref.invalidate_peers( );
+		--size_;
 	}
 
+	inline size_t size( ) const
+	{
+		return size_;
+	}
+
+	T* operator[]( size_t i )
+	{
+		size_t ptr_index = i % BLOCK_SIZE;
+		size_t chunk_index = ( i - ptr_index ) / BLOCK_SIZE;
+
+		return chunks_[ chunk_index ]->get_pointer_at( ptr_index );
+	}
 
 private:
 	std::vector<TChunk*> chunks_;
 	std::unordered_map<T*, TChunk*> memoryMap_;
-	std::set<TChunk*> freeChunks_;
+
+	struct Comparator
+	{
+	public:
+		inline bool operator()( TChunk* lhs, TChunk* rhs ) const
+		{
+			return lhs->priority( ) < rhs->priority( );
+		}
+	};
+
+	std::set<TChunk*, Comparator> freeChunks_;
+	size_t size_;
 };
