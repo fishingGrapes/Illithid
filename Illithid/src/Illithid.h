@@ -28,6 +28,6 @@
 
 #include "illithid/utils/Array3D.h"
 #include "illithid/utils/ptr_ref.h"
-#include "illithid/memory/PoolAllocator.h"
+#include "illithid/memory/GrowingBlockAllocator.h"
 
 #include "illithid/core/LogExtensions.h"

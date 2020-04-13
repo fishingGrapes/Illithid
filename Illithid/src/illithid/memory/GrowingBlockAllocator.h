@@ -13,6 +13,7 @@ public:
 		: priority_( priority ), buffer_( nullptr ), size_( 0 )
 	{
 		buffer_ = reinterpret_cast<T*>( malloc( BLOCK_SIZE * sizeof( T ) ) );
+		addresses_.resize( BLOCK_SIZE, nullptr );
 	}
 
 	~Chunk( )
@@ -22,6 +23,7 @@ public:
 			( buffer_ + i )->~T( );
 		}
 
+		addresses_.clear( );
 		free( buffer_ );
 		buffer_ = nullptr;
 	}
@@ -53,38 +55,45 @@ public:
 		return ( buffer_ + index );
 	}
 
-	void release( T* ptr )
+	void set_address( T** ptr )
+	{
+		addresses_[ size_ - 1 ] = ptr;
+	}
+
+	void release( T* ptr, Chunk<T, BLOCK_SIZE>* lastChunk, const std::function<void( T** )>& OnSwap )
 	{
 		ptr->~T( );
 
-		void* last = reinterpret_cast<void*>( buffer_ + ( size_ - 1 ) );
+		void* src = reinterpret_cast<void*>( lastChunk->buffer_ + ( lastChunk->size_ - 1 ) );
 		void* current = reinterpret_cast<void*>( ptr );
-		if (last != current)
+		if (src != current)
 		{
-			memcpy( current, last, sizeof( T ) );
-		}
+			memcpy( current, src, sizeof( T ) );
 
-		--size_;
+			*( lastChunk->addresses_[ lastChunk->size_ - 1 ] ) = reinterpret_cast<T*>( current );
+			OnSwap( lastChunk->addresses_[ lastChunk->size_ - 1 ] );
+		}
+		--lastChunk->size_;
 	}
 
 private:
 	T* buffer_;
+	std::vector<T**> addresses_;
 	size_t size_, priority_;
 };
 
 template <typename T, size_t BLOCK_SIZE>
-class PoolAllocator
+class GrowingBlockAllocator
 {
 	using TChunk = Chunk<T, BLOCK_SIZE>;
-
 public:
-	PoolAllocator( )
+	GrowingBlockAllocator( )
 		:size_( 0 )
 	{
 
 	}
 
-	~PoolAllocator( )
+	~GrowingBlockAllocator( )
 	{
 		freeChunks_.clear( );
 		for each (TChunk * chunk in chunks_)
@@ -107,7 +116,6 @@ public:
 
 		TChunk* chunk = *( freeChunks_.begin( ) );
 		T* ptr = chunk->allocate( );
-		memoryMap_[ ptr ] = chunk;
 
 		//If there is no more memory in the chunk, remove it from the free list
 		if (chunk->is_full( ))
@@ -115,31 +123,50 @@ public:
 			freeChunks_.erase( chunk );
 		}
 
-		return ptr_ref<T>( new( ptr ) T( std::forward<params>( args )... ), [ this ] ( T* ptr )
+		ptr_ref<T> ref( new( ptr ) T( std::forward<params>( args )... ), [ this ] ( ptr_ref<T>& ref )
 		{
-			this->release( ptr );
+			this->release( ref );
 		} );
 
+		chunk->set_address( ref.get_address( ) );
+		memoryMap_[ ref.get_address( ) ] = chunk;
+
 		++size_;
+		return ref;
 	}
 
-	void release( T* ptr )
+	void release( ptr_ref<T>& ref )
 	{
-		TChunk* chunk = memoryMap_[ ptr ];
-		chunk->release( ptr );
-		freeChunks_.insert( chunk );
+		TChunk* chunk = memoryMap_[ ref.get_address( ) ];
+		TChunk* lastChunk = nullptr;
 
-		--size_;
-	}
+		for (std::vector<TChunk*>::reverse_iterator rit = chunks_.rbegin( );
+			  rit != chunks_.rend( ); ++rit)
+		{
+			lastChunk = *( rit );
+			size_t size = lastChunk->size( );
+			if (size > 0)
+			{
+				break;
+			}
+		}
 
+		chunk->release( ref.get( ), lastChunk, [ & ] ( T** ptr )
+		{
+			this->memoryMap_[ ptr ] = chunk;
+		} );
 
-	void release( ptr_ref<T> ref )
-	{
-		TChunk* chunk = memoryMap_[ ref.get( ) ];
-		chunk->release( ref.get( ) );
-		freeChunks_.insert( chunk );
+		if (!lastChunk->is_full( ))
+		{
+			freeChunks_.insert( lastChunk );
+		}
 
-		ref.invalidate_peers( );
+		if (chunk->is_full( ))
+		{
+			freeChunks_.erase( chunk );
+		}
+
+		ref.set( nullptr );
 		--size_;
 	}
 
@@ -158,7 +185,7 @@ public:
 
 private:
 	std::vector<TChunk*> chunks_;
-	std::unordered_map<T*, TChunk*> memoryMap_;
+	std::unordered_map<T**, TChunk*> memoryMap_;
 
 	struct Comparator
 	{
