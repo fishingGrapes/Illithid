@@ -9,6 +9,7 @@
 
 namespace itd
 {
+
 	void Light::OnStart( )
 	{
 #if defined(IL_DEBUG) || defined(IL_RELEASE)

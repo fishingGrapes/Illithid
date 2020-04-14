@@ -1,6 +1,5 @@
 #pragma once
 #include <memory>
-
 #include "illithid/scene/Component.h"
 #include "illithid/renderer/Material.h"
 #include "illithid/renderer/StaticMesh.h"
@@ -8,7 +7,7 @@
 
 namespace itd
 {
-	class MeshRenderer : public Component<MeshRenderer>
+	class MeshRenderer : public Component<MeshRenderer, 128>
 	{
 	public:
 		std::shared_ptr<Material> Material;
@@ -19,6 +18,5 @@ namespace itd
 		virtual void OnPreRender( ) override;
 		virtual void OnRender( ) override;
 		virtual void OnPostRender( ) override;
-
 	};
 }

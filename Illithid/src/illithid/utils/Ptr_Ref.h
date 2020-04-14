@@ -1,6 +1,7 @@
 #pragma once
 #include <utility>
-
+#include <functional>
+#include "illithid/core/Log.h"
 
 template <typename T>
 class ptr_ref
@@ -57,6 +58,31 @@ public:
 		return *this;
 	}
 
+	template <typename U>
+	static ptr_ref<U> cast( ptr_ref<T>& other )
+	{
+		ptr_ref<U> ref;
+		U* data = dynamic_cast<U*>( *( other.data_ ) );
+
+		if (data)
+		{
+			/*using UDeleter = std::function<void( ptr_ref<U>& )>;
+			UDeleter* deleter = reinterpret_cast<UDeleter*>( reinterpret_cast<void*>( &( other.deleter_ ) ) );
+			ref.reset_ptr( reinterpret_cast<U**>( other.data_ ), other.refCount_, ( *deleter ) );
+			++( *( other.refCount_ ) );*/
+
+			ref = *( reinterpret_cast<ptr_ref<U>*>( reinterpret_cast<void*>( &( other ) ) ) );
+			++( *( other.refCount_ ) );
+
+			if (ref == nullptr)
+			{
+				IL_CORE_WARN( "Casting failed" );
+			}
+		}
+
+		return ref;
+	}
+
 	~ptr_ref( )
 	{
 		if (data_)
@@ -81,6 +107,13 @@ public:
 			}
 		}
 	}
+
+	/*void reset_ptr( T** const data, size_t* const refCount, const Deleter& deleter )
+	{
+		this->data_ = data;
+		this->refCount_ = refCount;
+		this->deleter_ = deleter;
+	}*/
 
 	//decreases the refcount by 1
 	void reset( )
@@ -112,11 +145,6 @@ public:
 	T* operator->( ) const
 	{
 		return ( *data_ );
-	}
-
-	T operator*( ) const
-	{
-		return *( *data_ );
 	}
 
 	bool operator==( const ptr_ref& other ) const
@@ -155,7 +183,7 @@ public:
 		return ( *refCount_ );
 	}
 
-	void set( T* ptr )
+	void set_data( T* ptr )
 	{
 		*data_ = ptr;
 	}

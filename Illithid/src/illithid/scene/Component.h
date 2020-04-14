@@ -1,16 +1,27 @@
 #pragma once
 #include <stdint.h>
+#include <memory>
+#include "illithid/memory/GrowingBlockAllocator.h"
+#include "illithid/core/Log.h"
 
 namespace itd
 {
+	static size_t allocations;
 	class GameObject;
 
 	class ComponentBase
 	{
 	public:
+		ComponentBase( )
+		{
+			++allocations;
+			IL_CORE_WARN( "Allocated: {0} components in memory", allocations );
+		}
+
 		virtual ~ComponentBase( )
 		{
-
+			--allocations;
+			IL_CORE_WARN( "Deallocated: {0} components in memory", allocations );
 		}
 
 		virtual void OnStart( ) = 0;
@@ -25,9 +36,11 @@ namespace itd
 			++componentID;
 			return componentID;
 		}
+
 	};
 
-	template<typename T>
+
+	template<typename T, size_t BLOCK_SIZE>
 	class Component : public ComponentBase
 	{
 
@@ -35,7 +48,7 @@ namespace itd
 		static const uint32_t ID;
 
 		Component( )
-			:Enabled( true )
+			:Enabled( true ), gameObject_( nullptr )
 		{
 
 		}
@@ -53,11 +66,21 @@ namespace itd
 
 		bool Enabled;
 
-		/*template<typename... params>
-		static std::shared_ptr<T> Instantiate( params... args )
+		template<typename... params>
+		static ptr_ref<T> Instantiate( params... args )
 		{
-			return allocator_.make_shared( std::forward<params>( args )... );
-		}*/
+			return allocator_->instantiate( std::forward<params>( args )... );
+		}
+
+		static void Destroy( ptr_ref<T>& component )
+		{
+			allocator_->release( component );
+		}
+
+		inline static std::shared_ptr<GrowingBlockAllocator<T, BLOCK_SIZE>> get_allocator( )
+		{
+			return allocator_;
+		}
 
 	protected:
 		GameObject* gameObject_;
@@ -69,12 +92,12 @@ namespace itd
 			gameObject_ = object;
 		}
 
-		//static GrowingAllocator<T> allocator_;
+		static std::shared_ptr<GrowingBlockAllocator<T, BLOCK_SIZE>> allocator_;
 	};
 
-	/*template<typename T>
-	GrowingAllocator<T> Component<T>::allocator_;*/
+	template <typename T, size_t BLOCK_SIZE>
+	std::shared_ptr<GrowingBlockAllocator<T, BLOCK_SIZE>> Component<T, BLOCK_SIZE>::allocator_ = std::make_shared<GrowingBlockAllocator<T, BLOCK_SIZE>>( );
 
-	template<typename T>
-	const uint32_t Component<T>::ID( ComponentBase::RegisterComponent( ) );
+	template<typename T, size_t BLOCK_SIZE>
+	const uint32_t Component<T, BLOCK_SIZE>::ID( ComponentBase::RegisterComponent( ) );
 }

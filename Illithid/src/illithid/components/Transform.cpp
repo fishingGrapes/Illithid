@@ -14,6 +14,7 @@ namespace itd
 	{
 	}
 
+
 	void Transform::Translate( const glm::vec3& displacement )
 	{
 		Position += displacement;

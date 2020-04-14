@@ -6,7 +6,7 @@
 
 namespace itd
 {
-	std::shared_ptr<Camera> Camera::primaryCamera_;
+	ptr_ref<Camera> Camera::primaryCamera_;
 
 	Camera::Camera( )
 		:projectionMatrix_( glm::mat4( 1.0f ) )

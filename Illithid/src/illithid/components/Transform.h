@@ -12,7 +12,7 @@ namespace itd
 		World, Local, Camera
 	};
 
-	class Transform : public Component<Transform>
+	class Transform : public Component<Transform, 256>
 	{
 	public:
 		glm::vec3 Position;

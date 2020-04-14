@@ -51,6 +51,8 @@ private:
 			glm::vec3( 0.0f,  0.0f, -3.0f )
 	};
 
+	ptr_ref<MeshRenderer> objRenderer_;
+
 public:
 
 	TestApplication( )
@@ -65,6 +67,16 @@ public:
 	// Inherited via Application
 	virtual void Start( ) override
 	{
+		ptr_ref<MeshRenderer> rend;
+		{
+			std::unique_ptr<GameObject> go = std::make_unique<GameObject>( );
+			rend = go->AddComponent<MeshRenderer>( );
+		}
+		if (rend != nullptr)
+		{
+			IL_CORE_INFO("Still Alive" );
+		}
+
 		Shader phongShader( "Assets/Shaders/phong.shader" );
 		std::shared_ptr<Material> phongMat_ = std::make_unique<Material>( phongShader );
 
@@ -72,12 +84,12 @@ public:
 		std::shared_ptr<Texture2D> barrel_specular = Texture2D::Load( "Assets/Textures/barrel_specular.tex2D" );
 
 		barrel_ = std::make_unique<GameObject>( );
-		auto renderer = barrel_->AddComponent<MeshRenderer>( );
-		renderer->Mesh = StaticMesh::Load( "Assets/Models/box.obj" );
-		renderer->Material = phongMat_;
-		renderer->Material->SetTexture( "u_Material.diffuse", barrel_diffuse );
-		renderer->Material->SetTexture( "u_Material.specular", barrel_specular );
-		renderer->Material->SetFloat( "u_Material.shininess", 32.0f );
+		objRenderer_ = barrel_->AddComponent<MeshRenderer>( );
+		objRenderer_->Mesh = StaticMesh::Load( "Assets/Models/box.obj" );
+		objRenderer_->Material = phongMat_;
+		objRenderer_->Material->SetTexture( "u_Material.diffuse", barrel_diffuse );
+		objRenderer_->Material->SetTexture( "u_Material.specular", barrel_specular );
+		objRenderer_->Material->SetFloat( "u_Material.shininess", 32.0f );
 		barrel_->GetTransform( )->Translate( glm::vec3( 1.0f, 0.0f, 0.0f ) );
 
 		camera_ = std::make_unique<GameObject>( );
@@ -159,6 +171,15 @@ public:
 			camera_->GetTransform( )->Translate( Time::Delta( ) * camera_->GetTransform( )->Right( ) );
 		}
 
+		if (Input::IsKeyDown( itd::KeyCode::SPACE ))
+		{
+			barrel_->RemoveComponent<MeshRenderer>( );
+			if (objRenderer_ == nullptr)
+			{
+				IL_TRACE( "Removed Mesh from barrel" );
+			}
+		}
+
 	}
 
 	// Inherited via Application
@@ -171,17 +192,22 @@ public:
 		spotLight_->GetTransform( )->Orientation = camera_->GetTransform( )->Orientation;
 
 
-		auto cupRenderer = barrel_->GetComponent<MeshRenderer>( );
-		cupRenderer->Material->SetVector3f( "u_ViewPosition", camera_->GetTransform( )->Position );
-		cupRenderer->Material->SetVector3f( "u_SpotLight.position", spotLight_->GetTransform( )->Position );
-		cupRenderer->Material->SetVector3f( "u_SpotLight.direction", spotLight_->GetTransform( )->Forward( ) );
+		if (objRenderer_ != nullptr)
+		{
+			objRenderer_->Material->SetVector3f( "u_ViewPosition", camera_->GetTransform( )->Position );
+			objRenderer_->Material->SetVector3f( "u_SpotLight.position", spotLight_->GetTransform( )->Position );
+			objRenderer_->Material->SetVector3f( "u_SpotLight.direction", spotLight_->GetTransform( )->Forward( ) );
+		}
 	}
 
 
 	// Inherited via Application
 	virtual void PreRender( ) override
 	{
-		barrel_->GetComponent<MeshRenderer>( )->Material->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( barrel_->GetTransform( )->InverseTRS( ) ) ) );
+		if (objRenderer_ != nullptr)
+		{
+			barrel_->GetComponent<MeshRenderer>( )->Material->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( barrel_->GetTransform( )->InverseTRS( ) ) ) );
+		}
 	}
 
 private:

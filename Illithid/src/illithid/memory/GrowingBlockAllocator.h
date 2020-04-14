@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <set>
 #include "illithid/utils/ptr_ref.h"
+#include "illithid/core/Log.h"
 
 template <typename T, size_t BLOCK_SIZE>
 struct Chunk
@@ -82,6 +83,8 @@ private:
 	size_t size_, priority_;
 };
 
+
+
 template <typename T, size_t BLOCK_SIZE>
 class GrowingBlockAllocator
 {
@@ -90,7 +93,6 @@ public:
 	GrowingBlockAllocator( )
 		:size_( 0 )
 	{
-
 	}
 
 	~GrowingBlockAllocator( )
@@ -166,7 +168,7 @@ public:
 			freeChunks_.erase( chunk );
 		}
 
-		ref.set( nullptr );
+		ref.set_data( nullptr );
 		--size_;
 	}
 

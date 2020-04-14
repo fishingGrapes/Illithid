@@ -11,7 +11,7 @@ namespace itd
 		Spot
 	};
 
-	class Light : public Component<Light>
+	class Light : public Component<Light, 32>
 	{
 	public:
 

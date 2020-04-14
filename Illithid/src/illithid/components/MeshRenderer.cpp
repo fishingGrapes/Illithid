@@ -5,9 +5,11 @@
 #include "illithid/scene/GameObject.h"
 #include "illithid/components/Camera.h"
 #include "illithid/components/Light.h"
+#include "illithid/core/Log.h"
 
 namespace itd
 {
+
 	void MeshRenderer::OnPreRender( )
 	{
 		Material->SetMatrix4f( "u_ViewProjection", Camera::Primary( )->ViewProjection( ) );
@@ -31,4 +33,5 @@ namespace itd
 	void MeshRenderer::OnPostRender( )
 	{
 	}
+
 }

@@ -1,19 +1,16 @@
 #pragma once
 
 #include <bitset>
-#include <vector>
 #include <unordered_map>
-#include <memory>
 
 #include "illithid/components/Transform.h"
-#include "SceneGraph.h"
-
 #include "illithid/core/Log.h"
 
 namespace itd
 {
 	//TODO: currently a max of 256 compoennts can be created
 	using ComponentFilter = std::bitset<256>;
+	using Deleter = std::function<void( )>;
 	class Transform;
 
 	class GameObject
@@ -26,7 +23,7 @@ namespace itd
 		~GameObject( );
 
 		template<typename T, typename... params>
-		std::shared_ptr<T> AddComponent( params... args )
+		ptr_ref<T> AddComponent( params... args )
 		{
 			if (componentFilter_[ T::ID ])
 			{
@@ -34,19 +31,23 @@ namespace itd
 				return  nullptr;
 			}
 
-			std::shared_ptr<T> t = std::make_shared<T>( std::forward<params>( args )... );
+			ptr_ref<T> t = T::Instantiate( std::forward<params>( args )... );
 			t->SetOwner( this );
 
-			components_.push_back( t );
-			componentMap_[ T::ID ] = t;
+			componentMap_[ T::ID ] = ptr_ref<T>::cast<ComponentBase>( t );
 			componentFilter_.set( T::ID, 1 );
+			deleterMap_[ T::ID ] = [ this ] ( )
+			{
+				ptr_ref<T> t = ptr_ref<ComponentBase>::cast<T>( componentMap_.at( T::ID ) );
+				T::Destroy( t );
+			};
 
 			t->OnStart( );
 			return t;
 		}
 
 		template<typename T>
-		std::shared_ptr<T> GetComponent( )
+		ptr_ref<T> GetComponent( )
 		{
 			if (!componentFilter_[ T::ID ])
 			{
@@ -54,7 +55,7 @@ namespace itd
 				return  nullptr;
 			}
 
-			std::shared_ptr<T> t = std::dynamic_pointer_cast<T>( componentMap_.at( T::ID ) );
+			ptr_ref<T> t = ptr_ref<ComponentBase>::cast<T>( componentMap_.at( T::ID ) );
 			return t;
 		}
 
@@ -64,7 +65,7 @@ namespace itd
 			return componentFilter_[ T::ID ];
 		}
 
-		/*template<typename T>
+		template<typename T>
 		void RemoveComponent( )
 		{
 			if (!componentFilter_[ T::ID ])
@@ -73,39 +74,26 @@ namespace itd
 				return;
 			}
 
-			auto itr = std::find_if( components_.begin( ), components_.end( ), [ this ] ( std::shared_ptr<T> const& ptr )
-			{
-				return ptr.get( ) == ( componentMap_.at( T::ID ) ).get( );
-			} );
-
-			std::swap( itr, ( components_.end( ) - 1 ) );
-			components_.pop_back( );
+			deleterMap_[ T::ID ]( );
 
 			componentMap_.erase( T::ID );
+			deleterMap_.erase( T::ID );
 			componentFilter_.set( T::ID, 0 );
-		}*/
+		}
 
-		inline std::shared_ptr<Transform> GetTransform( ) const
+		inline ptr_ref<Transform> GetTransform( ) const
 		{
 			return transform_;
 		}
 
 	private:
-		std::vector<std::shared_ptr<ComponentBase>> components_;
+
+		using ComponentMap = std::unordered_map<uint32_t, ptr_ref<ComponentBase>>;
+		using DeleterMap = std::unordered_map<uint32_t, Deleter>;
+
 		ComponentFilter componentFilter_;
-		std::unordered_map<uint32_t, std::shared_ptr<ComponentBase>> componentMap_;
-		std::shared_ptr<Transform> transform_;
-
-		friend class SceneGraph;
-
-		void Update( );
-		void PreRender( );
-		void Render( );
-		void PostRender( );
-
+		ComponentMap componentMap_;
+		DeleterMap deleterMap_;
+		ptr_ref<Transform> transform_;
 	};
 }
-
-#define BEGIN_COMPONENT_REGISTRATION() GameObject* _go = new GameObject()
-#define REGISTER_COMPONENT(x) _go->AddComponent<x>()
-#define END_COMPONENT_REGISTRATION() delete _go;

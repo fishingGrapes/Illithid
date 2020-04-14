@@ -27,7 +27,7 @@ namespace itd
 		float_t Far;
 	};
 
-	class Camera : public Component<Camera>
+	class Camera : public Component<Camera, 4>
 	{
 	public:
 
@@ -45,18 +45,18 @@ namespace itd
 		virtual void OnPostRender( ) override;
 
 
-		static void SetAsPrimary( std::shared_ptr<Camera> camera )
+		static void SetAsPrimary( ptr_ref<Camera> camera )
 		{
 			primaryCamera_ = camera;
 		}
 
-		inline static std::shared_ptr<Camera> Primary( )
+		inline static ptr_ref<Camera> Primary( )
 		{
 			return primaryCamera_;
 		}
 
 	private:
 		glm::mat4 projectionMatrix_;
-		static std::shared_ptr<Camera> primaryCamera_;
+		static ptr_ref<Camera> primaryCamera_;
 	};
 }

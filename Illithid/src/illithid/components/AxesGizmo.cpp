@@ -8,6 +8,7 @@
 
 namespace itd
 {
+
 	void AxesGizmo::OnStart( )
 	{
 		axes_[ 0 ] = std::make_unique<LineSegment>( glm::vec3( -1.0f, 0.0f, 0.0f ), glm::vec3( 1.0f, 0.0f, 0.0f ) );
@@ -42,4 +43,5 @@ namespace itd
 	{
 
 	}
+
 }

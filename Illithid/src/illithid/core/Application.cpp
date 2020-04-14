@@ -9,11 +9,10 @@
 #include "FileSystem.h"
 #include "Input.h"
 #include "illithid/renderer/Graphics.h"
-#include "illithid/scene/SceneGraph.h"
 #include "Resources.h"
 #include "illithid/imgui/Gui.h"
 
-#include "illithid/scene/GameObject.h"
+#include "illithid/components/ComponentRegistry.h"
 #include "illithid/components/Transform.h"
 #include "illithid/components/Camera.h"
 #include "illithid/components/AxesGizmo.h"
@@ -48,7 +47,8 @@ namespace itd
 		TimePoint previousTime = startTime;
 		TimePoint currentTime;
 
-		this->RegisterEngineComponents( );
+
+		ComponentRegistry::Start( );
 		this->Start( );
 		Graphics::EnableCapabality( Capability::Cap_DepthTest );
 
@@ -58,21 +58,22 @@ namespace itd
 			Time::delta_ = ( std::chrono::duration_cast<std::chrono::microseconds>( currentTime - previousTime ).count( ) ) / 1000000.0f;
 			Time::elapsed_ = ( std::chrono::duration_cast<std::chrono::microseconds>( currentTime - startTime ).count( ) ) / 1000000.0f;
 
-			SceneGraph::Update( );
+			ComponentRegistry::Update( );
 			this->Update( );
 
-			SceneGraph::PreRender( );
+			ComponentRegistry::PreRender( );
 			this->PreRender( );
 
 			Graphics::ClearColor( 0.1f, 0.1f, 0.1f, 1.0f );
 			Graphics::Clear( BufferBit::BB_Color | BufferBit::BB_Depth );
 
-			SceneGraph::Render( );
-			SceneGraph::PostRender( );
+			ComponentRegistry::Render( );
 
 			Gui::Begin( );
 			//GUI Layer Code Here
 			Gui::End( window_ );
+
+			ComponentRegistry::PostRender( );
 
 			window_->SwapBuffers( );
 			window_->PollEvents( );
@@ -110,23 +111,24 @@ namespace itd
 
 		Resources::Initialize( );
 		Gui::Initialize( window_ );
+
+		this->RegisterEngineComponents( );
 	}
 
 	void Application::Destroy( )
 	{
+		ComponentRegistry::Destroy( );
 		Input::Destroy( );
 		Gui::Destroy( );
 	}
 
 	void Application::RegisterEngineComponents( )
 	{
-		BEGIN_COMPONENT_REGISTRATION( );
-		REGISTER_COMPONENT( Transform );
-		REGISTER_COMPONENT( AxesGizmo );
-		REGISTER_COMPONENT( Camera );
-		REGISTER_COMPONENT( Light );
-		REGISTER_COMPONENT( MeshRenderer );
-		END_COMPONENT_REGISTRATION( );
+		ComponentRegistry::Register<Transform>( false, true, false, false, false );
+		ComponentRegistry::Register<AxesGizmo>( true, false, true, true, false );
+		ComponentRegistry::Register<Camera>( false, false, false, false, false );
+		ComponentRegistry::Register<Light>( true, false, true, true, false );
+		ComponentRegistry::Register<MeshRenderer>( false, false, true, true, false );
 	}
 
 	bool Application::OnWindowClosed( WindowClosedEvent& event )
