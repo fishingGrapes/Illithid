@@ -19,6 +19,7 @@
 #include "illithid/components/Light.h"
 #include "illithid/components/MeshRenderer.h"
 
+#include "illithid/utils/FrameRateCounter.h"
 
 namespace itd
 {
@@ -58,6 +59,9 @@ namespace itd
 			Time::delta_ = ( std::chrono::duration_cast<std::chrono::microseconds>( currentTime - previousTime ).count( ) ) / 1000000.0f;
 			Time::elapsed_ = ( std::chrono::duration_cast<std::chrono::microseconds>( currentTime - startTime ).count( ) ) / 1000000.0f;
 
+			fpsCounter_->Update( Time::delta_ );
+			window_->SetTitle( "GL Framerate: " + std::to_string( fpsCounter_->GetSmoothedFrameRate( ) ) + " FPS" );
+
 			ComponentRegistry::Update( );
 			this->Update( );
 
@@ -84,6 +88,11 @@ namespace itd
 		this->Shutdown( );
 	}
 
+	inline int32_t Application::FrameRate( ) const
+	{
+		return fpsCounter_->GetSmoothedFrameRate( );
+	}
+
 	void Application::OnEvent( Event& event )
 	{
 		EventDispatcher dispatcher( event );
@@ -102,6 +111,8 @@ namespace itd
 
 		window_ = std::make_unique<Window>( WindowProperties( "GL", 1280, 720 ) );
 		window_->SetEventListener( BIND_EVENT_FUNCTION( Application::OnEvent, this ) );
+
+		fpsCounter_ = std::make_unique<FrameRateCounter>( );
 
 		Screen::width_ = window_->Width( );
 		Screen::height_ = window_->Height( );
@@ -129,6 +140,8 @@ namespace itd
 		ComponentRegistry::Register<Camera>( false, false, false, false, false );
 		ComponentRegistry::Register<Light>( true, false, true, true, false );
 		ComponentRegistry::Register<MeshRenderer>( false, false, true, true, false );
+
+		IL_CORE_ERROR( "{0} {1} {2} {3} {4} ", Transform::ID, AxesGizmo::ID, Camera::ID, Light::ID, MeshRenderer::ID );
 	}
 
 	bool Application::OnWindowClosed( WindowClosedEvent& event )
@@ -145,4 +158,5 @@ namespace itd
 
 		return false;
 	}
+
 }

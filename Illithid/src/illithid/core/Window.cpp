@@ -135,6 +135,11 @@ namespace itd
 		glfwSwapBuffers( window_ );
 	}
 
+	void Window::SetTitle( const std::string& title )
+	{
+		glfwSetWindowTitle( window_, title.c_str( ) );
+	}
+
 	void Window::SetVsync( bool value )
 	{
 		glfwSwapInterval( value );

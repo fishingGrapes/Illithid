@@ -3,6 +3,8 @@
 #include <memory>
 #include "illithid/events/WindowEvents.h"
 
+class FrameRateCounter;
+
 namespace itd
 {
 	class Window;
@@ -14,6 +16,8 @@ namespace itd
 		virtual ~Application( );
 
 		void Run( );
+
+		inline int32_t FrameRate( ) const;
 
 	protected:
 		virtual void Start( ) = 0;
@@ -32,8 +36,8 @@ namespace itd
 		bool OnWindowResized( WindowResizedEvent& event );
 
 		std::unique_ptr<Window> window_;
+		std::unique_ptr<FrameRateCounter> fpsCounter_;
 		bool isRunning_;
-
 
 	};
 

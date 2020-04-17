@@ -40,9 +40,9 @@ private:
 	glm::vec2 mousePosition_;
 	glm::vec3 rotation_;
 
-	std::unique_ptr<GameObject> barrel_, camera_;
-	std::unique_ptr<GameObject>  dirLight_, spotLight_;
-	std::vector<std::unique_ptr<GameObject>> pointLights_;
+	ptr_ref<GameObject> barrel_, camera_;
+	ptr_ref<GameObject>  dirLight_, spotLight_;
+	std::array<ptr_ref<GameObject>, 4> pointLights_;
 
 	std::vector<glm::vec3> pointLightPositions_ = {
 			glm::vec3( 0.7f,  0.2f,  2.0f ),
@@ -62,20 +62,20 @@ public:
 
 	~TestApplication( )
 	{
+		GameObject::Destroy( barrel_ );
+		GameObject::Destroy( camera_ );
+		GameObject::Destroy( dirLight_ );
+		GameObject::Destroy( spotLight_ );
+
+		for (size_t i = 0; i < pointLights_.size( ); i++)
+		{
+			GameObject::Destroy( pointLights_[ i ] );
+		}
 	}
 
 	// Inherited via Application
 	virtual void Start( ) override
 	{
-		ptr_ref<MeshRenderer> rend;
-		{
-			std::unique_ptr<GameObject> go = std::make_unique<GameObject>( );
-			rend = go->AddComponent<MeshRenderer>( );
-		}
-		if (rend != nullptr)
-		{
-			IL_CORE_INFO("Still Alive" );
-		}
 
 		Shader phongShader( "Assets/Shaders/phong.shader" );
 		std::shared_ptr<Material> phongMat_ = std::make_unique<Material>( phongShader );
@@ -83,7 +83,7 @@ public:
 		std::shared_ptr<Texture2D> barrel_diffuse = Texture2D::Load( "Assets/Textures/barrel_diffuse.tex2D" );
 		std::shared_ptr<Texture2D> barrel_specular = Texture2D::Load( "Assets/Textures/barrel_specular.tex2D" );
 
-		barrel_ = std::make_unique<GameObject>( );
+		barrel_ = GameObject::Instantiate( "Box" );
 		objRenderer_ = barrel_->AddComponent<MeshRenderer>( );
 		objRenderer_->Mesh = StaticMesh::Load( "Assets/Models/box.obj" );
 		objRenderer_->Material = phongMat_;
@@ -92,7 +92,7 @@ public:
 		objRenderer_->Material->SetFloat( "u_Material.shininess", 32.0f );
 		barrel_->GetTransform( )->Translate( glm::vec3( 1.0f, 0.0f, 0.0f ) );
 
-		camera_ = std::make_unique<GameObject>( );
+		camera_ = GameObject::Instantiate( "Camera" );
 		camera_->GetTransform( )->Translate( glm::vec3( 0.0f, 0.0f, 1.0f ) );
 		auto cam = camera_->AddComponent<Camera>( );
 		cam->SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
@@ -213,7 +213,7 @@ public:
 private:
 	void CreateDirectionalLight( )
 	{
-		dirLight_ = std::make_unique<GameObject>( );
+		dirLight_ = GameObject::Instantiate( "Dir_Light" );
 		auto lightComp = dirLight_->AddComponent<Light>( itd::LightType::Directional );
 		lightComp->Color = glm::vec4( 0.5f, 1.0f, 0.125f, 1.0f );
 
@@ -227,17 +227,15 @@ private:
 
 	void CreatePointLight( )
 	{
-		Shader basicShader( "Assets/Shaders/color.shader" );
-		std::shared_ptr<Material> basicMat_ = std::make_unique<Material>( basicShader );
 
 		for (size_t i = 0; i < pointLightPositions_.size( ); ++i)
 		{
-			pointLights_.emplace_back( std::make_unique<GameObject>( ) );
+			ptr_ref<GameObject> go = GameObject::Instantiate( ( "Point_Light_" + std::to_string( i ) ) );
 
-			pointLights_[ i ]->GetTransform( )->Translate( pointLightPositions_[ i ] );
-			pointLights_[ i ]->GetTransform( )->Scale( glm::vec3( 0.125f ) );
+			go->GetTransform( )->Translate( pointLightPositions_[ i ] );
+			go->GetTransform( )->Scale( glm::vec3( 0.125f ) );
 
-			auto lightComp = pointLights_[ i ]->AddComponent<Light>( itd::LightType::Point );
+			auto lightComp = go->AddComponent<Light>( itd::LightType::Point );
 			lightComp->Color = glm::vec4( glm::linearRand( 0.0f, 1.0f ), glm::linearRand( 0.5f, 1.0f ), glm::linearRand( 0.0f, 1.0f ), 1.0f );
 
 			auto renderer = barrel_->GetComponent<MeshRenderer>( );
@@ -253,13 +251,14 @@ private:
 			renderer->Material->SetFloat( ( uniform + std::string( "].linear" ) ).c_str( ), 0.009f );
 			renderer->Material->SetFloat( ( uniform + std::string( "].quadratic" ) ).c_str( ), 0.032f );
 
+			pointLights_[ i ] = go;
 		}
 
 	}
 
 	void CreateSpotLight( )
 	{
-		spotLight_ = std::make_unique<GameObject>( );
+		spotLight_ = GameObject::Instantiate( "Spot_Light" );
 		auto lightComp = spotLight_->AddComponent<Light>( itd::LightType::Spot );
 		lightComp->Color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 

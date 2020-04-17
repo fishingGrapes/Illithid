@@ -34,6 +34,7 @@ namespace itd
 
 		void PollEvents( );
 		void SwapBuffers( );
+		void SetTitle(const std::string& title );
 
 
 		inline uint32_t Width( ) const

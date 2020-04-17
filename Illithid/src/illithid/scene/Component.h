@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <memory>
 #include "illithid/memory/GrowingBlockAllocator.h"
+#include "illithid/utils/ptr_ref.h"
 #include "illithid/core/Log.h"
 
 namespace itd
@@ -69,12 +70,12 @@ namespace itd
 		template<typename... params>
 		static ptr_ref<T> Instantiate( params... args )
 		{
-			return allocator_->instantiate( std::forward<params>( args )... );
+			return ptr_ref<T>( allocator_->instantiate( std::forward<params>( args )... ) );
 		}
 
 		static void Destroy( ptr_ref<T>& component )
 		{
-			allocator_->release( component );
+			allocator_->release( component.get_address( ) );
 		}
 
 		inline static std::shared_ptr<GrowingBlockAllocator<T, BLOCK_SIZE>> get_allocator( )

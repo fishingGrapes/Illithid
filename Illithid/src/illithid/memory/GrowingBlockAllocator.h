@@ -2,22 +2,22 @@
 #include <list>
 #include <unordered_map>
 #include <set>
-#include "illithid/utils/ptr_ref.h"
 #include "illithid/core/Log.h"
 
+
 template <typename T, size_t BLOCK_SIZE>
-struct Chunk
+struct GBA_Chunk
 {
 public:
 
-	explicit Chunk( size_t priority )
+	explicit GBA_Chunk( size_t priority )
 		: priority_( priority ), buffer_( nullptr ), size_( 0 )
 	{
 		buffer_ = reinterpret_cast<T*>( malloc( BLOCK_SIZE * sizeof( T ) ) );
 		addresses_.resize( BLOCK_SIZE, nullptr );
 	}
 
-	~Chunk( )
+	~GBA_Chunk( )
 	{
 		for (size_t i = 0; i < size_; ++i)
 		{
@@ -51,17 +51,17 @@ public:
 		return ptr;
 	}
 
-	T* get_pointer_at( size_t index )
+	T* at( size_t index )
 	{
 		return ( buffer_ + index );
 	}
 
-	void set_address( T** ptr )
+	void set_address( T** address )
 	{
-		addresses_[ size_ - 1 ] = ptr;
+		addresses_[ size_ - 1 ] = address;
 	}
 
-	void release( T* ptr, Chunk<T, BLOCK_SIZE>* lastChunk, const std::function<void( T** )>& OnSwap )
+	void release( T* ptr, GBA_Chunk<T, BLOCK_SIZE>* lastChunk, const std::function<void( T** )>& OnSwap )
 	{
 		ptr->~T( );
 
@@ -83,12 +83,11 @@ private:
 	size_t size_, priority_;
 };
 
-
-
 template <typename T, size_t BLOCK_SIZE>
 class GrowingBlockAllocator
 {
-	using TChunk = Chunk<T, BLOCK_SIZE>;
+	using TChunk = GBA_Chunk<T, BLOCK_SIZE>;
+
 public:
 	GrowingBlockAllocator( )
 		:size_( 0 )
@@ -102,12 +101,13 @@ public:
 		{
 			delete chunk;
 		}
+
 		chunks_.clear( );
 		memoryMap_.clear( );
 	}
 
 	template <typename... params>
-	ptr_ref<T> instantiate( params&& ...args )
+	T** instantiate( params&& ...args )
 	{
 		if (freeChunks_.empty( ))
 		{
@@ -125,21 +125,17 @@ public:
 			freeChunks_.erase( chunk );
 		}
 
-		ptr_ref<T> ref( new( ptr ) T( std::forward<params>( args )... ), [ this ] ( ptr_ref<T>& ref )
-		{
-			this->release( ref );
-		} );
-
-		chunk->set_address( ref.get_address( ) );
-		memoryMap_[ ref.get_address( ) ] = chunk;
+		T** address = new T * ( new( ptr ) T( std::forward<params>( args )... ) );
+		chunk->set_address( address );
+		memoryMap_[ address ] = chunk;
 
 		++size_;
-		return ref;
+		return address;
 	}
 
-	void release( ptr_ref<T>& ref )
+	void release( T** address )
 	{
-		TChunk* chunk = memoryMap_[ ref.get_address( ) ];
+		TChunk* chunk = memoryMap_[ address ];
 		TChunk* lastChunk = nullptr;
 
 		for (std::vector<TChunk*>::reverse_iterator rit = chunks_.rbegin( );
@@ -153,7 +149,7 @@ public:
 			}
 		}
 
-		chunk->release( ref.get( ), lastChunk, [ & ] ( T** ptr )
+		chunk->release( ( *address ), lastChunk, [ & ] ( T** ptr )
 		{
 			this->memoryMap_[ ptr ] = chunk;
 		} );
@@ -168,7 +164,7 @@ public:
 			freeChunks_.erase( chunk );
 		}
 
-		ref.set_data( nullptr );
+		*address = nullptr;
 		--size_;
 	}
 
@@ -182,7 +178,7 @@ public:
 		size_t ptr_index = i % BLOCK_SIZE;
 		size_t chunk_index = ( i - ptr_index ) / BLOCK_SIZE;
 
-		return chunks_[ chunk_index ]->get_pointer_at( ptr_index );
+		return chunks_[ chunk_index ]->at( ptr_index );
 	}
 
 private:

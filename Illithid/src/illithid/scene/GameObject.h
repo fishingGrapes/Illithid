@@ -6,20 +6,19 @@
 #include "illithid/components/Transform.h"
 #include "illithid/core/Log.h"
 
+
 namespace itd
 {
 	//TODO: currently a max of 256 compoennts can be created
 	using ComponentFilter = std::bitset<256>;
-	using Deleter = std::function<void( )>;
 	class Transform;
+	using Deleter = std::function<void( )>;
 
 	class GameObject
 	{
 
 	public:
-		GameObject( );
-
-		//TODO: Disable all components on Destruction
+		GameObject( const std::string& name );
 		~GameObject( );
 
 		template<typename T, typename... params>
@@ -34,13 +33,14 @@ namespace itd
 			ptr_ref<T> t = T::Instantiate( std::forward<params>( args )... );
 			t->SetOwner( this );
 
-			componentMap_[ T::ID ] = ptr_ref<T>::cast<ComponentBase>( t );
-			componentFilter_.set( T::ID, 1 );
 			deleterMap_[ T::ID ] = [ this ] ( )
 			{
-				ptr_ref<T> t = ptr_ref<ComponentBase>::cast<T>( componentMap_.at( T::ID ) );
+				ptr_ref<T> t = ptr_ref<ComponentBase>::dyn_cast<T>( componentMap_.at( T::ID ) );
 				T::Destroy( t );
 			};
+
+			componentMap_[ T::ID ] = ptr_ref<T>::dyn_cast<ComponentBase>( t );
+			componentFilter_.set( T::ID, 1 );
 
 			t->OnStart( );
 			return t;
@@ -55,7 +55,7 @@ namespace itd
 				return  nullptr;
 			}
 
-			ptr_ref<T> t = ptr_ref<ComponentBase>::cast<T>( componentMap_.at( T::ID ) );
+			ptr_ref<T> t = ptr_ref<ComponentBase>::dyn_cast<T>( componentMap_.at( T::ID ) );
 			return t;
 		}
 
@@ -81,9 +81,27 @@ namespace itd
 			componentFilter_.set( T::ID, 0 );
 		}
 
-		inline ptr_ref<Transform> GetTransform( ) const
+		inline ptr_ref<Transform> GetTransform( )
 		{
 			return transform_;
+		}
+
+		inline static ptr_ref<GameObject> Instantiate( const std::string& name )
+		{
+			ptr_ref<GameObject> dp = allocator_->instantiate( name );
+			dp.get_data( )->dptr_address_ = dp.get_address( );
+			return dp;
+		}
+
+		inline static void Destroy( ptr_ref<GameObject>& object )
+		{
+			allocator_->release( object.get_address( ) );
+		}
+
+		inline static void Destroy( GameObject* object )
+		{
+			allocator_->release( object->dptr_address_ );
+			object->dptr_address_ = nullptr;
 		}
 
 	private:
@@ -94,6 +112,11 @@ namespace itd
 		ComponentFilter componentFilter_;
 		ComponentMap componentMap_;
 		DeleterMap deleterMap_;
+
+		std::string name_;
 		ptr_ref<Transform> transform_;
+
+		static std::shared_ptr<GrowingBlockAllocator<GameObject, 128>> allocator_;
+		GameObject** dptr_address_;
 	};
 }
