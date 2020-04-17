@@ -42,10 +42,9 @@ namespace itd
 	bool Input::IsKeyDown( KeyCode keyCode )
 	{
 		uint16_t index = static_cast<uint16_t>( keyCode );
-
 		if (instance_->prevInputState_[ index ] == false && instance_->currentInputState_[ index ] == true)
 		{
-			instance_->prevInputState_[ index ] = instance_->currentInputState_[ index ];
+			instance_->prevInputState_[ index ] = instance_->currentInputState_[ index ] = true;
 			return true;
 		}
 		return false;
@@ -56,7 +55,6 @@ namespace itd
 		uint16_t index = static_cast<uint16_t>( keyCode );
 		if (instance_->prevInputState_[ index ] == true && instance_->currentInputState_[ index ] == false)
 		{
-			instance_->prevInputState_[ index ] = instance_->currentInputState_[ index ];
 			return true;
 		}
 		return false;
@@ -72,7 +70,7 @@ namespace itd
 	{
 		if (instance_->prevInputState_[ mouse ] == false && instance_->currentInputState_[ mouse ] == true)
 		{
-			instance_->prevInputState_[ mouse ] = instance_->currentInputState_[ mouse ];
+			instance_->prevInputState_[ mouse ] = instance_->currentInputState_[ mouse ] = true;
 			return true;
 		}
 		return false;
@@ -82,7 +80,6 @@ namespace itd
 	{
 		if (instance_->prevInputState_[ mouse ] == true && instance_->currentInputState_[ mouse ] == false)
 		{
-			instance_->prevInputState_[ mouse ] = instance_->currentInputState_[ mouse ];
 			return true;
 		}
 		return false;
@@ -92,6 +89,8 @@ namespace itd
 	{
 		return ( instance_->prevInputState_[ mouse ] == true && instance_->currentInputState_[ mouse ] == true );
 	}
+
+
 
 	glm::vec2 Input::GetMouseScrollDelta( )
 	{
@@ -120,24 +119,28 @@ namespace itd
 
 	bool Input::OnKeyPressed( KeyPressedEvent& event )
 	{
+		prevInputState_[ event.KeyCode( ) ] = currentInputState_[ event.KeyCode( ) ];
 		currentInputState_[ event.KeyCode( ) ] = true;
 		return false;
 	}
 
 	bool Input::OnKeyReleased( KeyReleasedEvent& event )
 	{
+		prevInputState_[ event.KeyCode( ) ] = true;
 		currentInputState_[ event.KeyCode( ) ] = false;
 		return false;
 	}
 
 	bool Input::OnMouseButtonPressed( MouseButtonPressedEvent& event )
 	{
+		prevInputState_[ event.Button( ) ] = currentInputState_[ event.Button( ) ];
 		currentInputState_[ event.Button( ) ] = true;
 		return false;
 	}
 
 	bool Input::OnMouseButtonReleased( MouseButtonReleasedEvent& event )
 	{
+		prevInputState_[ event.Button( ) ] = true;
 		currentInputState_[ event.Button( ) ] = false;
 		return false;
 	}

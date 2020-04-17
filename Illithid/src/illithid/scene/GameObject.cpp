@@ -10,6 +10,8 @@ namespace itd
 	GameObject::GameObject( const std::string& name )
 		: name_( name )
 	{
+		IL_CORE_INFO( "Created {0}", name_ );
+
 		componentFilter_.reset( );
 		transform_ = this->AddComponent<Transform>( );
 
@@ -20,7 +22,6 @@ namespace itd
 
 	GameObject::~GameObject( )
 	{
-		IL_CORE_INFO( "Destroyed {0}", name_ );
 		transform_ = nullptr;
 
 		for (DeleterMap::iterator it = deleterMap_.begin( ); it != deleterMap_.end( ); ++it)
@@ -31,5 +32,7 @@ namespace itd
 		deleterMap_.clear( );
 		componentMap_.clear( );
 		componentFilter_.reset( );
+
+		IL_CORE_INFO( "Destroyed {0}", name_ );
 	}
 }

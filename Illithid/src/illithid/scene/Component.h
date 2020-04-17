@@ -7,22 +7,15 @@
 
 namespace itd
 {
-	static size_t allocations;
 	class GameObject;
 
 	class ComponentBase
 	{
 	public:
-		ComponentBase( )
-		{
-			++allocations;
-			IL_CORE_WARN( "Allocated: {0} components in memory", allocations );
-		}
 
 		virtual ~ComponentBase( )
 		{
-			--allocations;
-			IL_CORE_WARN( "Deallocated: {0} components in memory", allocations );
+
 		}
 
 		virtual void OnStart( ) = 0;

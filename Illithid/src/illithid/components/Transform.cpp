@@ -86,7 +86,9 @@ namespace itd
 		scaleMatrix = glm::scale( scaleMatrix, ScaleFactor );
 
 		TRS_ = translateMatrix * rotateMatrix * scaleMatrix;
-		inverseTRS_ = glm::inverse( TRS_ );
+
+		translateMatrix = glm::mat4( 1.0f );
+		inverseTRS_ = glm::scale( scaleMatrix, 1.0f / ScaleFactor ) * glm::transpose( rotateMatrix ) * glm::translate( translateMatrix, -1.0f * Position );
 	}
 
 	void Transform::OnPreRender( )

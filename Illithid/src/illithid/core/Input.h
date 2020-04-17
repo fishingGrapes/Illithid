@@ -35,6 +35,7 @@ namespace itd
 		static bool IsMouseButtonUp( int16_t mouse );
 		static bool IsMouseButtonHeld( int16_t mouse );
 
+
 		static inline glm::vec2 GetMousePosition( )
 		{
 			return instance_->mousePositionState_.Current;
@@ -75,7 +76,7 @@ namespace itd
 		static Input* instance_;
 
 		static void Initialize( );
-		static void Destroy();
+		static void Destroy( );
 
 		static void ProcessEvent( Event& event );
 	};
