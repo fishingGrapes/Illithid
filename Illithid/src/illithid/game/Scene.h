@@ -1,16 +1,15 @@
 #pragma once
 #include <vector>
-#include "illithid/utils/ptr.h"
 #include "GameObject.h"
 
 namespace itd
 {
 	class Scene
 	{
-		using GameObjects = std::vector<ptr<GameObject>>;
+		using GameObjects = std::vector<GameObject*>;
 
 	public:
-		inline void AddRootObject( ptr<GameObject> object )
+		inline void AddRootObject( GameObject* object )
 		{
 			roots_.push_back( object );
 		}
@@ -20,7 +19,7 @@ namespace itd
 			return roots_.size( );
 		}
 
-		inline ptr<GameObject> GetRootObject( size_t index ) const
+		inline GameObject* GetRootObject( size_t index ) const
 		{
 			return roots_[ index ];
 		}

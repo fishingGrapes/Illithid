@@ -31,7 +31,7 @@ namespace itd
 			}
 
 			dptr<T> t = T::Instantiate( std::forward<params>( args )... );
-			t->SetOwner( ptr<GameObject>( this ) );
+			t->SetOwner( this );
 
 			deleterMap_[ T::ID ] = [ this ] ( )
 			{
@@ -86,32 +86,9 @@ namespace itd
 			return transform_;
 		}
 
-		//inline static dptr<GameObject> Instantiate( const std::string& name )
-		//{
-		//	dptr<GameObject> dp = allocator_->instantiate( name );
-		//	dp.get_data( )->dptr_address_ = dp.get_address( );
-		//	return dp;
-		//}
-
-		//inline static void Destroy( ptr<GameObject>& object )
-		//{
-		//	//allocator_->release( object.get_address( ) );
-		//}
-
-		//inline static void Destroy( GameObject* object )
-		//{
-		//	/*allocator_->release( object->dptr_address_ );
-		//	object->dptr_address_ = nullptr;*/
-		//}
-
-		inline static ptr<GameObject> Instantiate( const std::string& name )
+		inline static GameObject* Instantiate( const std::string& name )
 		{
-			return ptr<GameObject>( new GameObject( name ) );
-		}
-
-		inline static void Destroy( ptr<GameObject>& object )
-		{
-			delete ( object.get( ) );
+			return new GameObject( name );
 		}
 
 		inline static void Destroy( GameObject* object )
@@ -130,9 +107,6 @@ namespace itd
 
 		std::string name_;
 		dptr<Transform> transform_;
-
-		/*static std::shared_ptr<GrowingBlockAllocator<GameObject, 128>> allocator_;
-		GameObject** dptr_address_;*/
 
 		void operator delete( void* p )
 		{

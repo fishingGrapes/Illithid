@@ -40,9 +40,11 @@ private:
 	glm::vec2 mousePosition_;
 	glm::vec3 rotation_;
 
-	ptr<GameObject> barrel_, camera_;
-	ptr<GameObject>  dirLight_, spotLight_;
-	std::array<ptr<GameObject>, 4> pointLights_;
+	GameObject* barrel_;
+	GameObject* camera_;
+	GameObject* dirLight_;
+	GameObject* spotLight_;
+	std::array<GameObject*, 4> pointLights_;
 
 	std::vector<glm::vec3> pointLightPositions_ = {
 			glm::vec3( 0.7f,  0.2f,  2.0f ),
@@ -235,7 +237,7 @@ private:
 
 		for (size_t i = 0; i < pointLightPositions_.size( ); ++i)
 		{
-			ptr<GameObject> go = GameObject::Instantiate( ( "Point_Light_" + std::to_string( i ) ) );
+			GameObject* go = GameObject::Instantiate( ( "Point_Light_" + std::to_string( i ) ) );
 
 			go->GetTransform( )->Translate( pointLightPositions_[ i ] );
 			go->GetTransform( )->Scale( glm::vec3( 0.125f ) );

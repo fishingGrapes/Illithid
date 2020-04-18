@@ -5,7 +5,6 @@
 
 namespace itd
 {
-	//std::shared_ptr<GrowingBlockAllocator<GameObject, 128>> GameObject::allocator_ = std::make_shared<GrowingBlockAllocator<GameObject, 128>>( );
 
 	GameObject::GameObject( const std::string& name )
 		: name_( name )
