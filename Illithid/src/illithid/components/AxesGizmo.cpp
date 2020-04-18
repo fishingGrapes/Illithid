@@ -3,7 +3,7 @@
 
 #include "illithid/core/Resources.h"
 #include "illithid/renderer/Graphics.h"
-#include "illithid/scene/GameObject.h"
+#include "illithid/game/GameObject.h"
 #include "illithid/components/Camera.h"
 
 namespace itd
@@ -31,7 +31,7 @@ namespace itd
 
 	void AxesGizmo::OnRender( )
 	{
-		Resources::UnlitMaterial->SetMatrix4f( "u_Model", gameObject_->GetTransform( )->TRS( ) );
+		Resources::UnlitMaterial->SetMatrix4f( "u_Model", gameObject->GetTransform( )->TRS( ) );
 		for (size_t i = 0; i < axes_.size( ); i++)
 		{
 			Resources::UnlitMaterial->SetVector4f( "u_Color", colors_[ i ] );

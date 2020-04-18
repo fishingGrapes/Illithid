@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 
-#include "illithid/scene/Component.h"
+#include "illithid/game/Component.h"
 #include "illithid/renderer/LineSegment.h"
 #include "glm/glm.hpp"
 

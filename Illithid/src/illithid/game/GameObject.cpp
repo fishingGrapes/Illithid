@@ -5,7 +5,7 @@
 
 namespace itd
 {
-	std::shared_ptr<GrowingBlockAllocator<GameObject, 128>> GameObject::allocator_ = std::make_shared<GrowingBlockAllocator<GameObject, 128>>( );
+	//std::shared_ptr<GrowingBlockAllocator<GameObject, 128>> GameObject::allocator_ = std::make_shared<GrowingBlockAllocator<GameObject, 128>>( );
 
 	GameObject::GameObject( const std::string& name )
 		: name_( name )
@@ -22,7 +22,10 @@ namespace itd
 
 	GameObject::~GameObject( )
 	{
-		transform_ = nullptr;
+		for (size_t i = 0; i < transform_->ChildCount( ); ++i)
+		{
+			GameObject::Destroy( transform_->GetChild( i )->gameObject );
+		}
 
 		for (DeleterMap::iterator it = deleterMap_.begin( ); it != deleterMap_.end( ); ++it)
 		{
@@ -33,6 +36,7 @@ namespace itd
 		componentMap_.clear( );
 		componentFilter_.reset( );
 
+		transform_ = nullptr;
 		IL_CORE_INFO( "Destroyed {0}", name_ );
 	}
 }

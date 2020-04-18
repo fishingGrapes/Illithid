@@ -65,7 +65,7 @@ public:
 		GrowingBlockAllocator<Pack, 3> packAlloc_;
 
 
-		std::vector< ptr_ref<Pack>> packs_;
+		std::vector< dptr<Pack>> packs_;
 		{
 			for (size_t i = 0; i < 7; i++)
 			{

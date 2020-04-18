@@ -40,9 +40,9 @@ private:
 	glm::vec2 mousePosition_;
 	glm::vec3 rotation_;
 
-	ptr_ref<GameObject> barrel_, camera_;
-	ptr_ref<GameObject>  dirLight_, spotLight_;
-	std::array<ptr_ref<GameObject>, 4> pointLights_;
+	ptr<GameObject> barrel_, camera_;
+	ptr<GameObject>  dirLight_, spotLight_;
+	std::array<ptr<GameObject>, 4> pointLights_;
 
 	std::vector<glm::vec3> pointLightPositions_ = {
 			glm::vec3( 0.7f,  0.2f,  2.0f ),
@@ -51,7 +51,7 @@ private:
 			glm::vec3( 0.0f,  0.0f, -3.0f )
 	};
 
-	ptr_ref<MeshRenderer> objRenderer_;
+	dptr<MeshRenderer> objRenderer_;
 
 public:
 
@@ -180,6 +180,11 @@ public:
 			}
 		}
 
+		if (Input::IsKeyDown( itd::KeyCode::ESCAPE ))
+		{
+			Application::Quit( );
+		}
+
 	}
 
 	// Inherited via Application
@@ -230,7 +235,7 @@ private:
 
 		for (size_t i = 0; i < pointLightPositions_.size( ); ++i)
 		{
-			ptr_ref<GameObject> go = GameObject::Instantiate( ( "Point_Light_" + std::to_string( i ) ) );
+			ptr<GameObject> go = GameObject::Instantiate( ( "Point_Light_" + std::to_string( i ) ) );
 
 			go->GetTransform( )->Translate( pointLightPositions_[ i ] );
 			go->GetTransform( )->Scale( glm::vec3( 0.125f ) );

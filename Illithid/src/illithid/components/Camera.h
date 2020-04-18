@@ -1,6 +1,6 @@
 #pragma once
 #include "glm/glm.hpp"
-#include "illithid/scene/Component.h"
+#include "illithid/game/Component.h"
 
 namespace itd
 {
@@ -45,18 +45,18 @@ namespace itd
 		virtual void OnPostRender( ) override;
 
 
-		static void SetAsPrimary( ptr_ref<Camera> camera )
+		static void SetAsPrimary( dptr<Camera> camera )
 		{
 			primaryCamera_ = camera;
 		}
 
-		inline static ptr_ref<Camera> Primary( )
+		inline static dptr<Camera> Primary( )
 		{
 			return primaryCamera_;
 		}
 
 	private:
 		glm::mat4 projectionMatrix_;
-		static ptr_ref<Camera> primaryCamera_;
+		static dptr<Camera> primaryCamera_;
 	};
 }

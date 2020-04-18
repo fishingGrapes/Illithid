@@ -16,8 +16,13 @@ namespace itd
 		virtual ~Application( );
 
 		void Run( );
-
 		inline int32_t FrameRate( ) const;
+
+		inline static void Quit( )
+		{
+			isRunning_ = false;
+		}
+
 
 	protected:
 		virtual void Start( ) = 0;
@@ -37,7 +42,7 @@ namespace itd
 
 		std::unique_ptr<Window> window_;
 		std::unique_ptr<FrameRateCounter> fpsCounter_;
-		bool isRunning_;
+		static bool isRunning_;
 
 	};
 

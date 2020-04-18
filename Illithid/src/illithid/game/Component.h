@@ -2,7 +2,8 @@
 #include <stdint.h>
 #include <memory>
 #include "illithid/memory/GrowingBlockAllocator.h"
-#include "illithid/utils/ptr_ref.h"
+#include "illithid/utils/ptr.h"
+#include "illithid/utils/dptr.h"
 #include "illithid/core/Log.h"
 
 namespace itd
@@ -42,7 +43,7 @@ namespace itd
 		static const uint32_t ID;
 
 		Component( )
-			:Enabled( true ), gameObject_( nullptr )
+			:Enabled( true )
 		{
 
 		}
@@ -61,12 +62,12 @@ namespace itd
 		bool Enabled;
 
 		template<typename... params>
-		static ptr_ref<T> Instantiate( params... args )
+		static dptr<T> Instantiate( params... args )
 		{
-			return ptr_ref<T>( allocator_->instantiate( std::forward<params>( args )... ) );
+			return dptr<T>( allocator_->instantiate( std::forward<params>( args )... ) );
 		}
 
-		static void Destroy( ptr_ref<T>& component )
+		static void Destroy( dptr<T>& component )
 		{
 			allocator_->release( component.get_address( ) );
 		}
@@ -76,16 +77,16 @@ namespace itd
 			return allocator_;
 		}
 
-	protected:
-		GameObject* gameObject_;
+		ptr<GameObject> gameObject;
 
 	private:
 		friend class GameObject;
-		inline void SetOwner( GameObject* object )
+		inline void SetOwner( ptr<GameObject> object )
 		{
-			gameObject_ = object;
+			gameObject = object;
 		}
 
+		friend class GrowingBlockAllocator<T, BLOCK_SIZE>;
 		static std::shared_ptr<GrowingBlockAllocator<T, BLOCK_SIZE>> allocator_;
 	};
 

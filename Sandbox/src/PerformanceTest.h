@@ -15,8 +15,8 @@ class TestApplication : public itd::Application
 {
 
 private:
-	std::vector<ptr_ref<GameObject>> objects_;
-	ptr_ref<GameObject> camera_;
+	std::vector<dptr<GameObject>> objects_;
+	dptr<GameObject> camera_;
 
 public:
 

@@ -22,7 +22,7 @@ namespace itd
 		~GameObject( );
 
 		template<typename T, typename... params>
-		ptr_ref<T> AddComponent( params... args )
+		dptr<T> AddComponent( params... args )
 		{
 			if (componentFilter_[ T::ID ])
 			{
@@ -30,16 +30,16 @@ namespace itd
 				return  nullptr;
 			}
 
-			ptr_ref<T> t = T::Instantiate( std::forward<params>( args )... );
-			t->SetOwner( this );
+			dptr<T> t = T::Instantiate( std::forward<params>( args )... );
+			t->SetOwner( ptr<GameObject>( this ) );
 
 			deleterMap_[ T::ID ] = [ this ] ( )
 			{
-				ptr_ref<T> t = ptr_ref<ComponentBase>::dyn_cast<T>( componentMap_.at( T::ID ) );
+				dptr<T> t = dptr<ComponentBase>::dyn_cast<T>( componentMap_.at( T::ID ) );
 				T::Destroy( t );
 			};
 
-			componentMap_[ T::ID ] = ptr_ref<T>::dyn_cast<ComponentBase>( t );
+			componentMap_[ T::ID ] = dptr<T>::dyn_cast<ComponentBase>( t );
 			componentFilter_.set( T::ID, 1 );
 
 			t->OnStart( );
@@ -47,7 +47,7 @@ namespace itd
 		}
 
 		template<typename T>
-		ptr_ref<T> GetComponent( )
+		dptr<T> GetComponent( )
 		{
 			if (!componentFilter_[ T::ID ])
 			{
@@ -55,7 +55,7 @@ namespace itd
 				return  nullptr;
 			}
 
-			ptr_ref<T> t = ptr_ref<ComponentBase>::dyn_cast<T>( componentMap_.at( T::ID ) );
+			dptr<T> t = dptr<ComponentBase>::dyn_cast<T>( componentMap_.at( T::ID ) );
 			return t;
 		}
 
@@ -81,32 +81,47 @@ namespace itd
 			componentFilter_.set( T::ID, 0 );
 		}
 
-		inline ptr_ref<Transform> GetTransform( )
+		inline dptr<Transform> GetTransform( )
 		{
 			return transform_;
 		}
 
-		inline static ptr_ref<GameObject> Instantiate( const std::string& name )
+		//inline static dptr<GameObject> Instantiate( const std::string& name )
+		//{
+		//	dptr<GameObject> dp = allocator_->instantiate( name );
+		//	dp.get_data( )->dptr_address_ = dp.get_address( );
+		//	return dp;
+		//}
+
+		//inline static void Destroy( ptr<GameObject>& object )
+		//{
+		//	//allocator_->release( object.get_address( ) );
+		//}
+
+		//inline static void Destroy( GameObject* object )
+		//{
+		//	/*allocator_->release( object->dptr_address_ );
+		//	object->dptr_address_ = nullptr;*/
+		//}
+
+		inline static ptr<GameObject> Instantiate( const std::string& name )
 		{
-			ptr_ref<GameObject> dp = allocator_->instantiate( name );
-			dp.get_data( )->dptr_address_ = dp.get_address( );
-			return dp;
+			return ptr<GameObject>( new GameObject( name ) );
 		}
 
-		inline static void Destroy( ptr_ref<GameObject>& object )
+		inline static void Destroy( ptr<GameObject>& object )
 		{
-			allocator_->release( object.get_address( ) );
+			delete ( object.get( ) );
 		}
 
 		inline static void Destroy( GameObject* object )
 		{
-			allocator_->release( object->dptr_address_ );
-			object->dptr_address_ = nullptr;
+			delete object;
 		}
 
 	private:
 
-		using ComponentMap = std::unordered_map<uint32_t, ptr_ref<ComponentBase>>;
+		using ComponentMap = std::unordered_map<uint32_t, dptr<ComponentBase>>;
 		using DeleterMap = std::unordered_map<uint32_t, Deleter>;
 
 		ComponentFilter componentFilter_;
@@ -114,9 +129,17 @@ namespace itd
 		DeleterMap deleterMap_;
 
 		std::string name_;
-		ptr_ref<Transform> transform_;
+		dptr<Transform> transform_;
 
-		static std::shared_ptr<GrowingBlockAllocator<GameObject, 128>> allocator_;
-		GameObject** dptr_address_;
+		/*static std::shared_ptr<GrowingBlockAllocator<GameObject, 128>> allocator_;
+		GameObject** dptr_address_;*/
+
+		void operator delete( void* p )
+		{
+			free( p );
+		}
 	};
+
 }
+
+

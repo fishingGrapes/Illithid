@@ -1,5 +1,5 @@
 #pragma once
-#include "illithid/scene/Component.h"
+#include "illithid/game/Component.h"
 #include "glm/glm.hpp"
 
 namespace itd

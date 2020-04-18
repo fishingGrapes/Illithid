@@ -10,8 +10,15 @@ namespace itd
 {
 	Transform::Transform( )
 		: Position( glm::vec3( 0.0f ) ), Orientation( glm::quat( 1.0f, 0.0f, 0.0f, 0.0f ) ), ScaleFactor( glm::vec3( 1.0f ) ),
-		TRS_( glm::mat4( 1.0f ) ), inverseTRS_( glm::mat4( 1.0f ) )
+		TRS_( glm::mat4( 1.0f ) ), inverseTRS_( glm::mat4( 1.0f ) ),
+		parent_( nullptr )
 	{
+	}
+
+	Transform::~Transform( )
+	{
+		parent_ = nullptr;
+		children_.clear( );
 	}
 
 
@@ -70,6 +77,20 @@ namespace itd
 	{
 		return Orientation * glm::vec3( 0.0f, 1.0f, 0.0f );
 	}
+
+	void Transform::SetParent( dptr<Transform> parent )
+	{
+		parent_ = parent;
+	}
+
+	void Transform::DetachChildren( )
+	{
+		for each (auto & child in children_)
+		{
+			child->SetParent( parent_ );
+		}
+	}
+
 
 	void Transform::OnStart( )
 	{

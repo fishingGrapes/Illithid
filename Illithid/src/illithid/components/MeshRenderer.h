@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include "illithid/scene/Component.h"
+#include "illithid/game/Component.h"
 #include "illithid/renderer/Material.h"
 #include "illithid/renderer/StaticMesh.h"
 

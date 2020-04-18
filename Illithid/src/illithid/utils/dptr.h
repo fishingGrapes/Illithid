@@ -1,38 +1,38 @@
 #pragma once
 
 template <typename T>
-class ptr_ref
+class dptr
 {
 public:
-	ptr_ref( )
+	dptr( )
 		:ptr_( nullptr )
 	{
 
 	}
 
-	ptr_ref( T** ptr )
+	dptr( T** ptr )
 		:ptr_( ptr )
 	{
 	}
 
-	ptr_ref( const ptr_ref& other )
+	dptr( const dptr& other )
 		: ptr_( other.ptr_ )
 	{
 	}
 
-	ptr_ref( ptr_ref&& other ) noexcept
+	dptr( dptr&& other ) noexcept
 		: ptr_( other.ptr_ )
 	{
 		other.ptr_ = nullptr;
 	}
 
-	ptr_ref& operator=( const ptr_ref& other )
+	dptr& operator=( const dptr& other )
 	{
 		this->ptr_ = other.ptr_;
 		return *this;
 	}
 
-	ptr_ref& operator=( ptr_ref&& other ) noexcept
+	dptr& operator=( dptr&& other ) noexcept
 	{
 		this->ptr_ = other.ptr_;
 		other.ptr_ = nullptr;
@@ -55,30 +55,36 @@ public:
 		return ptr_;
 	}
 
-	inline bool operator==( const ptr_ref& other ) const
+	inline bool operator==( const dptr& other ) const
 	{
 		if (other.ptr_)
 		{
 			return ( *ptr_ ) == *( other.ptr_ );
 		}
 
-		return ( *ptr_ == nullptr );
+		if (ptr_)
+		{
+			return ( *ptr_ == nullptr );
+		}
+
+		return ptr_ == nullptr;
+
 	}
 
-	inline bool operator!=( const ptr_ref& other ) const
+	inline bool operator!=( const dptr& other ) const
 	{
 		return !( operator==( other ) );
 	}
 
 	template <typename U>
-	static ptr_ref<U> dyn_cast( ptr_ref<T>& other )
+	static dptr<U> dyn_cast( dptr<T>& other )
 	{
-		ptr_ref<U> dp;
+		dptr<U> dp;
 		U* data = dynamic_cast<U*>( other.get_data( ) );
 
 		if (data)
 		{
-			dp = ptr_ref<U>( reinterpret_cast<U**>( other.get_address( ) ) );
+			dp = dptr<U>( reinterpret_cast<U**>( other.get_address( ) ) );
 		}
 		return dp;
 	}

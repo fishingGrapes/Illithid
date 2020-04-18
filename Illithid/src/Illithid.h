@@ -21,13 +21,13 @@
 #include "nlohmann/json.hpp"
 
 #include "illithid/renderer/Graphics.h"
-#include "illithid/scene/GameObject.h"
+#include "illithid/game/GameObject.h"
 
 #include "illithid/components/MeshRenderer.h"
 #include "illithid/components/Transform.h"
 
 #include "illithid/utils/Array3D.h"
 #include "illithid/memory/GrowingBlockAllocator.h"
-#include "illithid/utils/ptr_ref.h"
+#include "illithid/utils/dptr.h"
 
 #include "illithid/core/LogExtensions.h"

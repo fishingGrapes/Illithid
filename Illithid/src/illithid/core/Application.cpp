@@ -29,8 +29,9 @@ namespace itd
 	int32_t Screen::width_ = 0;
 	int32_t Screen::height_ = 0;
 
-	Application::Application( ) :
-		isRunning_( true )
+	bool Application::isRunning_ = true;
+
+	Application::Application( )
 	{
 		this->Initialize( );
 	}
@@ -101,6 +102,7 @@ namespace itd
 
 		Input::ProcessEvent( event );
 	}
+
 
 	void Application::Initialize( )
 	{

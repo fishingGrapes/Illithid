@@ -1,7 +1,7 @@
 #include "ilpch.h"
 #include "Light.h"
 
-#include "illithid/scene/GameObject.h"
+#include "illithid/game/GameObject.h"
 #include "illithid/components/MeshRenderer.h"
 #include "illithid/components/Camera.h"
 #include "illithid/core/Resources.h"
@@ -15,7 +15,7 @@ namespace itd
 #if defined(IL_DEBUG) || defined(IL_RELEASE)
 		if (Type == LightType::Point)
 		{
-			auto renderer = gameObject_->AddComponent<MeshRenderer>( );
+			auto renderer = gameObject->AddComponent<MeshRenderer>( );
 			renderer->Material = Resources::UnlitMaterial;
 			renderer->Mesh = Resources::CubeMesh;
 		}
@@ -31,7 +31,7 @@ namespace itd
 #if defined(IL_DEBUG) || defined(IL_RELEASE)
 		if (Type == LightType::Point)
 		{
-			gameObject_->GetComponent<MeshRenderer>( )->Material->SetMatrix4f( "u_ViewProjection", Camera::Primary( )->ViewProjection( ) );
+			gameObject->GetComponent<MeshRenderer>( )->Material->SetMatrix4f( "u_ViewProjection", Camera::Primary( )->ViewProjection( ) );
 		}
 #endif
 
@@ -42,8 +42,8 @@ namespace itd
 #if defined(IL_DEBUG) || defined(IL_RELEASE)
 		if (Type == LightType::Point)
 		{
-			auto renderer = gameObject_->GetComponent<MeshRenderer>( );
-			renderer->Material->SetMatrix4f( "u_Model", gameObject_->GetTransform( )->TRS( ) );
+			auto renderer = gameObject->GetComponent<MeshRenderer>( );
+			renderer->Material->SetMatrix4f( "u_Model", gameObject->GetTransform( )->TRS( ) );
 			renderer->Material->SetVector4f( "u_Color", Color );
 
 			Graphics::DrawMesh( *renderer->Mesh, *renderer->Material );
