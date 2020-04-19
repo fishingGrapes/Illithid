@@ -86,6 +86,11 @@ namespace itd
 			return transform_;
 		}
 
+		inline std::string& GetName( )
+		{
+			return name_;
+		}
+
 		inline static GameObject* Instantiate( const std::string& name )
 		{
 			return new GameObject( name );

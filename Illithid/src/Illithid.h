@@ -30,4 +30,6 @@
 #include "illithid/memory/GrowingBlockAllocator.h"
 #include "illithid/utils/dptr.h"
 
+#include "illithid/game/SceneManager.h"
+
 #include "illithid/core/LogExtensions.h"

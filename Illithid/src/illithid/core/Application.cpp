@@ -19,6 +19,7 @@
 #include "illithid/components/Light.h"
 #include "illithid/components/MeshRenderer.h"
 
+#include "illithid/game/SceneManager.h"
 #include "illithid/utils/FrameRateCounter.h"
 
 namespace itd
@@ -65,6 +66,7 @@ namespace itd
 
 			ComponentRegistry::Update( );
 			this->Update( );
+			SceneManager::UpdateTransforms( );
 
 			ComponentRegistry::PreRender( );
 			this->PreRender( );
@@ -130,6 +132,8 @@ namespace itd
 
 	void Application::Destroy( )
 	{
+		SceneManager::UnloadCurrentScene( );
+
 		ComponentRegistry::Destroy( );
 		Input::Destroy( );
 		Gui::Destroy( );
@@ -137,7 +141,7 @@ namespace itd
 
 	void Application::RegisterEngineComponents( )
 	{
-		ComponentRegistry::Register<Transform>( false, true, false, false, false );
+		ComponentRegistry::Register<Transform>( false, false, false, false, false );
 		ComponentRegistry::Register<AxesGizmo>( true, false, true, true, false );
 		ComponentRegistry::Register<Camera>( false, false, false, false, false );
 		ComponentRegistry::Register<Light>( true, false, true, true, false );

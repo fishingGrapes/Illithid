@@ -5,6 +5,7 @@
 #include "illithid/core/LogExtensions.h"
 
 #include "glm/gtc/matrix_transform.hpp"
+#include "illithid/game/GameObject.h"
 
 namespace itd
 {
@@ -81,12 +82,15 @@ namespace itd
 	void Transform::SetParent( dptr<Transform> parent )
 	{
 		parent_ = parent;
+		parent_->children_.push_back( gameObject->GetComponent<Transform>( ) );
 	}
 
 	void Transform::DetachChildren( )
 	{
 		for each (auto & child in children_)
 		{
+			//Use SiblingIndex to find the iterator quickly
+			parent_->children_.erase( std::find( parent_->children_.begin( ), parent_->children_.end( ), child ) );
 			child->SetParent( parent_ );
 		}
 	}
@@ -106,10 +110,18 @@ namespace itd
 		glm::mat4 scaleMatrix = glm::mat4( 1.0f );
 		scaleMatrix = glm::scale( scaleMatrix, ScaleFactor );
 
-		TRS_ = translateMatrix * rotateMatrix * scaleMatrix;
+		glm::mat4 transformation = IsRoot( ) ? glm::mat4( 1.0f ) : parent_->TRS( );
+		TRS_ = transformation * ( translateMatrix * rotateMatrix * scaleMatrix );
 
 		translateMatrix = glm::mat4( 1.0f );
-		inverseTRS_ = glm::scale( scaleMatrix, 1.0f / ScaleFactor ) * glm::transpose( rotateMatrix ) * glm::translate( translateMatrix, -1.0f * Position );
+		transformation = IsRoot( ) ? glm::mat4( 1.0f ) : parent_->InverseTRS( );
+		inverseTRS_ = transformation * ( glm::scale( scaleMatrix, 1.0f / ScaleFactor ) * glm::transpose( rotateMatrix ) * glm::translate( translateMatrix, -1.0f * Position ) );
+
+
+		for each (auto & child in children_)
+		{
+			child->OnUpdate( );
+		}
 	}
 
 	void Transform::OnPreRender( )
