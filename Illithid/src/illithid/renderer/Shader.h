@@ -10,5 +10,7 @@ namespace itd
 
 		std::string VertexSource;
 		std::string FragmentSource;
+		size_t ShaderQueue;
+		bool HasLightingPass;
 	};
 }

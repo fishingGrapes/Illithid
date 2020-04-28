@@ -10,7 +10,8 @@
 
 namespace itd
 {
-	Material::Material( const Shader& shader )
+	Material::Material( const Shader& shader ) :
+		ShaderQueue( shader.ShaderQueue ), HasLightingPass( shader.HasLightingPass )
 	{
 		this->CreateProgram( shader );
 		this->CacheUniforms( );

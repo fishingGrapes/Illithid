@@ -6,8 +6,12 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
+
 namespace itd
 {
+
+	std::multiset<MeshRenderer*, Graphics::Comparator> Graphics::renderGraph_;
+
 	void Graphics::Initialize( std::unique_ptr<Window>& window )
 	{
 		GLFWwindow* glwindow = static_cast<GLFWwindow*>( window->GetRawWindow( ) );
@@ -71,6 +75,41 @@ namespace itd
 		mesh.Bind( );
 
 		glDrawArrays( GL_LINES, 0, static_cast<GLsizei>( 2 ) );
+	}
+
+	void Graphics::BuildRenderGraph( )
+	{
+		renderGraph_.clear( );
+
+		auto& allocator = *( MeshRenderer::get_allocator( ) );
+		for (size_t i = 0; i < allocator.size( ); ++i)
+		{
+			renderGraph_.insert( allocator[ i ] );
+		}
+	}
+
+	void Graphics::DrawRenderGraph( )
+	{
+		std::shared_ptr<Material> first_material = ( *( renderGraph_.begin( ) ) )->Material;
+		uint32_t prev_program = first_material->ProgramID( );
+		first_material->Use( );
+
+		for (auto it = renderGraph_.begin( ); it != renderGraph_.end( ); ++it)
+		{
+			MeshRenderer* renderer = *( it );
+			std::shared_ptr<Material> material = renderer->Material;
+			std::shared_ptr<StaticMesh> mesh = renderer->Mesh;
+			uint32_t current_program = material->ProgramID( );
+
+			//Switch shaders only when necessary
+			if (current_program != prev_program)
+			{
+				material->Use( );
+				prev_program = current_program;
+			}
+			mesh->Bind( );
+			glDrawArrays( GL_TRIANGLES, 0, static_cast<GLsizei>( mesh->VertexCount( ) ) );
+		}
 	}
 
 

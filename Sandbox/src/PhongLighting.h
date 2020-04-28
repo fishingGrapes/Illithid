@@ -45,6 +45,7 @@ private:
 
 	GameObject* barrel01_;
 	GameObject* barrel02_;
+	GameObject* barrel03_;
 	GameObject* camera_;
 	GameObject* dirLight_;
 	GameObject* spotLight_;
@@ -77,6 +78,7 @@ public:
 		Shader phongShader( "Assets/Shaders/phong.shader" );
 		std::shared_ptr<Material> phongMat01_ = std::make_unique<Material>( phongShader );
 		std::shared_ptr<Material> phongMat02_ = std::make_unique<Material>( phongShader );
+		std::shared_ptr<Material> phongMat03_ = std::make_unique<Material>( phongShader );
 
 		std::shared_ptr<Texture2D> barrel_diffuse = Texture2D::Load( "Assets/Textures/barrel_diffuse.tex2D" );
 		std::shared_ptr<Texture2D> barrel_specular = Texture2D::Load( "Assets/Textures/barrel_specular.tex2D" );
@@ -100,6 +102,17 @@ public:
 		objRenderer_->Material->SetFloat( "u_Material.shininess", 32.0f );
 		barrel02_->GetTransform( )->Translate( glm::vec3( -1.0f, -1.0f, 0.0f ) );
 		barrel02_->GetTransform( )->SetParent( barrel01_->GetTransform( ) );
+
+		barrel03_ = GameObject::Instantiate( "Box_02" );
+		objRenderer_ = barrel03_->AddComponent<MeshRenderer>( );
+		objRenderer_->Mesh = StaticMesh::Load( "Assets/Models/box.obj" );
+		objRenderer_->Material = phongMat03_;
+		objRenderer_->Material->SetTexture( "u_Material.diffuse", barrel_diffuse );
+		objRenderer_->Material->SetTexture( "u_Material.specular", barrel_specular );
+		objRenderer_->Material->SetFloat( "u_Material.shininess", 32.0f );
+		barrel03_->GetTransform( )->Translate( glm::vec3( -1.0f, -1.0f, 0.0f ) );
+		barrel03_->GetTransform( )->SetParent( barrel02_->GetTransform( ) );
+
 
 		camera_ = GameObject::Instantiate( "Camera" );
 		camera_->GetTransform( )->Translate( glm::vec3( 0.0f, 0.0f, 1.0f ) );
@@ -202,13 +215,18 @@ public:
 	// Inherited via Application
 	virtual void Update( ) override
 	{
-		barrel01_->GetTransform( )->Rotate( glm::vec3( 0, 0.01f, 0 ), itd::TransformationSpace::Local );
-		barrel02_->GetTransform( )->Rotate( glm::vec3( 0, -0.01f, 0 ), itd::TransformationSpace::Local );
+		barrel01_->GetTransform( )->Rotate( glm::vec3( 0.0f, 0.01f, 0.01f ), itd::TransformationSpace::Local );
+		barrel02_->GetTransform( )->Rotate( glm::vec3( 0.0f, -0.05f, 0.0f ), itd::TransformationSpace::Local );
+		barrel03_->GetTransform( )->Rotate( glm::vec3( 0.0f, 0.0f, 0.0f ), itd::TransformationSpace::World );
 
 		MoveCamera( );
 
 		spotLight_->GetTransform( )->Position = camera_->GetTransform( )->Position;
 		spotLight_->GetTransform( )->Orientation = camera_->GetTransform( )->Orientation;
+
+		SetSpotLightPosition( barrel01_ );
+		SetSpotLightPosition( barrel02_ );
+		SetSpotLightPosition( barrel03_ );
 
 	}
 
@@ -216,10 +234,9 @@ public:
 	// Inherited via Application
 	virtual void PreRender( ) override
 	{
-
 		barrel01_->GetComponent<MeshRenderer>( )->Material->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( barrel01_->GetTransform( )->InverseTRS( ) ) ) );
 		barrel02_->GetComponent<MeshRenderer>( )->Material->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( barrel02_->GetTransform( )->InverseTRS( ) ) ) );
-
+		barrel03_->GetComponent<MeshRenderer>( )->Material->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( barrel03_->GetTransform( )->InverseTRS( ) ) ) );
 	}
 
 private:
@@ -227,10 +244,11 @@ private:
 	{
 		dirLight_ = GameObject::Instantiate( "Dir_Light" );
 		auto lightComp = dirLight_->AddComponent<Light>( itd::LightType::Directional );
-		lightComp->Color = glm::vec4( 0.5f, 1.0f, 0.125f, 1.0f );
+		lightComp->Color = glm::vec4( 0.5f, 0.5f, 0.5f, 1.0f );
 
 		SetDirLightUniforms( barrel01_, lightComp );
 		SetDirLightUniforms( barrel02_, lightComp );
+		SetDirLightUniforms( barrel03_, lightComp );
 	}
 
 	void CreatePointLight( )
@@ -246,6 +264,7 @@ private:
 			std::string uniform = "u_PointLights[" + std::to_string( i );
 			SetPointLightUniforms( barrel01_, go, uniform );
 			SetPointLightUniforms( barrel02_, go, uniform );
+			SetPointLightUniforms( barrel03_, go, uniform );
 
 			pointLights_[ i ] = go;
 		}
@@ -260,6 +279,7 @@ private:
 
 		SetSpotLightUniforms( barrel01_ );
 		SetSpotLightUniforms( barrel02_ );
+		SetSpotLightUniforms( barrel03_ );
 	}
 
 	void SetDirLightUniforms( GameObject* object, dptr<Light> lightComp )

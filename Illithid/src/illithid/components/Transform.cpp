@@ -11,7 +11,7 @@ namespace itd
 {
 	Transform::Transform( )
 		: Position( glm::vec3( 0.0f ) ), Orientation( glm::quat( 1.0f, 0.0f, 0.0f, 0.0f ) ), ScaleFactor( glm::vec3( 1.0f ) ),
-		TRS_( glm::mat4( 1.0f ) ), inverseTRS_( glm::mat4( 1.0f ) ),
+		TRS_( glm::mat4( 1.0f ) ), inverseTRS_( glm::mat4( 1.0f ) ), eulers_( glm::vec3( 0.0f ) ),
 		parent_( nullptr )
 	{
 	}
@@ -30,6 +30,13 @@ namespace itd
 
 	void Transform::Rotate( const glm::vec3& euler, TransformationSpace space )
 	{
+		eulers_ = euler;
+
+		//if (!IsRoot( ))
+		//{
+		//	eulers_ += parent_->eulers_;
+		//}
+
 		glm::quat& delta_x = glm::angleAxis( euler.x, glm::vec3( 1.0f, 0.0f, 0.0f ) );	//pitch
 		glm::quat& delta_y = glm::angleAxis( euler.y, glm::vec3( 0.0f, 1.0f, 0.0f ) );	//yaw
 		glm::quat& delta_z = glm::angleAxis( euler.z, glm::vec3( 0.0f, 0.0f, 1.0f ) );	//roll
@@ -37,10 +44,26 @@ namespace itd
 		switch (space)
 		{
 			case TransformationSpace::World:
-				Orientation = delta_x * Orientation;
-				Orientation = delta_y * Orientation;
-				Orientation = delta_z * Orientation;
-				break;
+				{
+					if (!IsRoot( ))
+					{
+						glm::quat& p_delta_x = glm::angleAxis( -parent_->eulers_.x, glm::vec3( 1.0f, 0.0f, 0.0f ) );
+						glm::quat& p_delta_y = glm::angleAxis( -parent_->eulers_.y, glm::vec3( 0.0f, 1.0f, 0.0f ) );
+						glm::quat& p_delta_z = glm::angleAxis( -parent_->eulers_.z, glm::vec3( 0.0f, 0.0f, 1.0f ) );
+
+						Orientation = p_delta_x * Orientation * delta_x;
+						Orientation = p_delta_y * Orientation * delta_y;
+						Orientation = p_delta_z * Orientation * delta_z;
+					}
+					else
+					{
+						Orientation = Orientation * delta_x;
+						Orientation = Orientation * delta_y;
+						Orientation = Orientation * delta_z;
+					}
+
+					break;
+				}
 
 			case TransformationSpace::Local:
 				Orientation = Orientation * delta_x;
@@ -134,6 +157,7 @@ namespace itd
 
 	void Transform::OnPostRender( )
 	{
+		eulers_ = glm::vec3( 0.0f );
 	}
 
 }

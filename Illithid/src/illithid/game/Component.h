@@ -94,7 +94,6 @@ namespace itd
 		friend class GrowingBlockAllocator<T, BLOCK_SIZE>;
 		static std::shared_ptr<GrowingBlockAllocator<T, BLOCK_SIZE>> allocator_;
 
-
 	};
 
 	template <typename T, size_t BLOCK_SIZE>

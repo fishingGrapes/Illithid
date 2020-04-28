@@ -6,8 +6,8 @@
 namespace itd
 {
 
-	GameObject::GameObject( const std::string& name )
-		: name_( name )
+	GameObject::GameObject( const std::string& name, bool is_static )
+		: name_( name ), Static( is_static )
 	{
 		IL_CORE_INFO( "Created {0}", name_ );
 

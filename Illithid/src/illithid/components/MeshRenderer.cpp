@@ -13,13 +13,12 @@ namespace itd
 	void MeshRenderer::OnPreRender( )
 	{
 		Material->SetMatrix4f( "u_ViewProjection", Camera::Primary( )->ViewProjection( ) );
+		Material->SetMatrix4f( "u_Model", gameObject->GetTransform( )->TRS( ) );
 	}
 
 	void MeshRenderer::OnRender( )
 	{
-		Material->SetMatrix4f( "u_Model", gameObject->GetTransform( )->TRS( ) );
-
-		Graphics::DrawMesh( *Mesh, *Material );
+		//Graphics::DrawMesh( *Mesh, *Material );
 	}
 
 	void MeshRenderer::OnStart( )

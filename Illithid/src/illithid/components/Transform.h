@@ -78,6 +78,8 @@ namespace itd
 		glm::mat4 TRS_;
 		glm::mat4 inverseTRS_;
 
+		glm::vec3 eulers_;
+
 		dptr<Transform> parent_;
 		ChildrenList children_;
 	};

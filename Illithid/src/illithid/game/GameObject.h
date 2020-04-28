@@ -18,7 +18,7 @@ namespace itd
 	{
 
 	public:
-		GameObject( const std::string& name );
+		explicit GameObject( const std::string& name, bool is_static = true );
 		~GameObject( );
 
 		template<typename T, typename... params>
@@ -100,6 +100,8 @@ namespace itd
 		{
 			delete object;
 		}
+
+		const bool Static;
 
 	private:
 

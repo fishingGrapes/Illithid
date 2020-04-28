@@ -74,7 +74,9 @@ namespace itd
 			Graphics::ClearColor( 0.1f, 0.1f, 0.1f, 1.0f );
 			Graphics::Clear( BufferBit::BB_Color | BufferBit::BB_Depth );
 
+			Graphics::BuildRenderGraph( );
 			ComponentRegistry::Render( );
+			Graphics::DrawRenderGraph( );
 
 			Gui::Begin( );
 			//GUI Layer Code Here
@@ -113,7 +115,7 @@ namespace itd
 
 		FileSystem::Initialize( );
 
-		window_ = std::make_unique<Window>( WindowProperties( "GL", 1280, 720 ) );
+		window_ = std::make_unique<Window>( WindowProperties( "GL", 1920, 1080 ) );
 		window_->SetEventListener( BIND_EVENT_FUNCTION( Application::OnEvent, this ) );
 
 		fpsCounter_ = std::make_unique<FrameRateCounter>( );
@@ -141,13 +143,11 @@ namespace itd
 
 	void Application::RegisterEngineComponents( )
 	{
-		ComponentRegistry::Register<Transform>( false, false, false, false, false );
+		ComponentRegistry::Register<Transform>( false, false, false, false, true );
 		ComponentRegistry::Register<AxesGizmo>( true, false, true, true, false );
 		ComponentRegistry::Register<Camera>( false, false, false, false, false );
 		ComponentRegistry::Register<Light>( true, false, true, true, false );
-		ComponentRegistry::Register<MeshRenderer>( false, false, true, true, false );
-
-		IL_CORE_ERROR( "{0} {1} {2} {3} {4} ", Transform::ID, AxesGizmo::ID, Camera::ID, Light::ID, MeshRenderer::ID );
+		ComponentRegistry::Register<MeshRenderer>( false, false, true, false, false );
 	}
 
 	bool Application::OnWindowClosed( WindowClosedEvent& event )

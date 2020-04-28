@@ -27,6 +27,14 @@ namespace itd
 		void SetMatrix3f( const char* uniform, const glm::mat3& value );
 		void SetMatrix4f( const char* uniform, const glm::mat4& value );
 
+		inline uint32_t ProgramID( ) const
+		{
+			return program_;
+		}
+
+		const bool HasLightingPass;
+		const size_t ShaderQueue;
+
 	private:
 		struct UniformData
 		{
