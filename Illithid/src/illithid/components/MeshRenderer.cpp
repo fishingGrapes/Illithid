@@ -14,6 +14,11 @@ namespace itd
 	{
 		Material->SetMatrix4f( "u_ViewProjection", Camera::Primary( )->ViewProjection( ) );
 		Material->SetMatrix4f( "u_Model", gameObject->GetTransform( )->TRS( ) );
+
+		if (Material->HasLightingPass)
+		{
+			Material->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( gameObject->GetTransform( )->InverseTRS( ) ) ) );
+		}
 	}
 
 	void MeshRenderer::OnRender( )

@@ -112,7 +112,7 @@ namespace itd
 	{
 		if (textureMap_.find( uniform ) == textureMap_.end( ))
 		{
-			int32_t unit = static_cast<int32_t>( textureMap_.size( ) );
+			uint32_t unit = static_cast<uint32_t>( textureMap_.size( ) );
 			textureMap_[ uniform ] = TextureData{ texture , unit };
 
 			UniformData& data = uniformMap_[ uniform ];
@@ -127,10 +127,11 @@ namespace itd
 
 	void Material::Use( )
 	{
-		uint32_t textureUnit = 0;
+		//Must be called here so the same texture can be bound to different units
+		//across different materials.
 		for (auto& element : textureMap_)
 		{
-			element.second.Texture->BindToTextureUnit( textureUnit++ );
+			element.second.Texture->BindToTextureUnit( element.second.Unit );
 		}
 
 		glUseProgram( program_ );

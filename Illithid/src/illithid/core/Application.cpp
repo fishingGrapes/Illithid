@@ -54,6 +54,8 @@ namespace itd
 		ComponentRegistry::Start( );
 		this->Start( );
 		Graphics::EnableCapabality( Capability::Cap_DepthTest );
+		Graphics::EnableCapabality( Capability::Cap_CullFace );
+		Graphics::EnableCapabality( Capability::Cap_Blending );
 
 		while (isRunning_)
 		{
@@ -69,9 +71,8 @@ namespace itd
 			SceneManager::UpdateTransforms( );
 
 			ComponentRegistry::PreRender( );
-			this->PreRender( );
 
-			Graphics::ClearColor( 0.1f, 0.1f, 0.1f, 1.0f );
+			Graphics::ClearColor( 0.1f, 0.1f, 0.15f, 1.0f );
 			Graphics::Clear( BufferBit::BB_Color | BufferBit::BB_Depth );
 
 			Graphics::BuildRenderGraph( );
@@ -148,6 +149,7 @@ namespace itd
 		ComponentRegistry::Register<Camera>( false, false, false, false, false );
 		ComponentRegistry::Register<Light>( true, false, true, true, false );
 		ComponentRegistry::Register<MeshRenderer>( false, false, true, false, false );
+
 	}
 
 	bool Application::OnWindowClosed( WindowClosedEvent& event )

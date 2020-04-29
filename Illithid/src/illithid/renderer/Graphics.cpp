@@ -6,6 +6,8 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
+#include "illithid/components/Light.h"
+#include "illithid/components/Camera.h"
 
 namespace itd
 {
@@ -81,18 +83,21 @@ namespace itd
 	{
 		renderGraph_.clear( );
 
-		auto& allocator = *( MeshRenderer::get_allocator( ) );
-		for (size_t i = 0; i < allocator.size( ); ++i)
+		auto& renderers = *( MeshRenderer::get_allocator( ) );
+		for (size_t i = 0; i < renderers.size( ); ++i)
 		{
-			renderGraph_.insert( allocator[ i ] );
+			renderGraph_.insert( renderers[ i ] );
 		}
 	}
 
 	void Graphics::DrawRenderGraph( )
 	{
+
 		std::shared_ptr<Material> first_material = ( *( renderGraph_.begin( ) ) )->Material;
 		uint32_t prev_program = first_material->ProgramID( );
 		first_material->Use( );
+
+		auto& lights = *( Light::get_allocator( ) );
 
 		for (auto it = renderGraph_.begin( ); it != renderGraph_.end( ); ++it)
 		{
@@ -105,10 +110,83 @@ namespace itd
 			if (current_program != prev_program)
 			{
 				material->Use( );
+				material->SetVector3f( "u_ViewPosition", Camera::Primary( )->gameObject->GetTransform( )->Position );
 				prev_program = current_program;
 			}
+
 			mesh->Bind( );
-			glDrawArrays( GL_TRIANGLES, 0, static_cast<GLsizei>( mesh->VertexCount( ) ) );
+			if (material->HasLightingPass)
+			{
+				glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+				glDepthFunc( GL_LEQUAL );
+
+				for (size_t i = 0; i < lights.size( ); ++i)
+				{
+
+					Light* light = lights[ i ];
+					GLuint lightingFunctionIndex = 0;
+
+					switch (light->Type)
+					{
+						case LightType::Directional:
+							{
+								material->SetVector3f( "u_DirectionalLight.direction", glm::vec3( -0.2f, -1.0f, -0.3f ) );
+								material->SetVector3f( "u_DirectionalLight.ambient", 0.005f * light->Color );
+								material->SetVector3f( "u_DirectionalLight.diffuse", 0.4f * light->Color );
+								material->SetVector3f( "u_DirectionalLight.specular", 0.5f * light->Color );
+
+								lightingFunctionIndex = glGetSubroutineIndex( material->ProgramID( ), GL_FRAGMENT_SHADER, "CalculateDirectionLight" );
+								break;
+							}
+						case LightType::Point:
+							{
+								material->SetVector3f( "u_PointLight.position", light->gameObject->GetTransform( )->Position );
+
+								material->SetVector3f( "u_PointLight.ambient", 0.005f * light->Color );
+								material->SetVector3f( "u_PointLight.diffuse", 0.8f * light->Color );
+								material->SetVector3f( "u_PointLight.specular", 1.0f * light->Color );
+
+								material->SetFloat( "u_PointLight.constant", 1.0f );
+								material->SetFloat( "u_PointLight.linear", 0.009f );
+								material->SetFloat( "u_PointLight.quadratic", 0.032f );
+
+								lightingFunctionIndex = glGetSubroutineIndex( material->ProgramID( ), GL_FRAGMENT_SHADER, "CalculatePointLight" );
+								break;
+							}
+						case LightType::Spot:
+							{
+								material->SetVector3f( "u_SpotLight.ambient", glm::vec3( 0.0f ) );
+								material->SetVector3f( "u_SpotLight.diffuse", glm::vec3( 1.0f ) );
+								material->SetVector3f( "u_SpotLight.specular", glm::vec3( 1.0f ) );
+
+								material->SetFloat( "u_SpotLight.constant", 1.0f );
+								material->SetFloat( "u_SpotLight.linear", 0.009f );
+								material->SetFloat( "u_SpotLight.quadratic", 0.032f );
+
+								material->SetFloat( "u_SpotLight.innerCutoff", glm::cos( glm::radians( 12.5f ) ) );
+								material->SetFloat( "u_SpotLight.outerCutoff", glm::cos( glm::radians( 15.0f ) ) );
+
+								material->SetVector3f( "u_SpotLight.position", light->gameObject->GetTransform( )->Position );
+								material->SetVector3f( "u_SpotLight.direction", light->gameObject->GetTransform( )->Forward( ) );
+
+								lightingFunctionIndex = glGetSubroutineIndex( material->ProgramID( ), GL_FRAGMENT_SHADER, "CalculateSpotLight" );
+								break;
+							}
+					}
+
+
+					glUniformSubroutinesuiv( GL_FRAGMENT_SHADER, 1, &lightingFunctionIndex );
+					glDrawArrays( GL_TRIANGLES, 0, static_cast<GLsizei>( mesh->VertexCount( ) ) );
+					glBlendFunc( GL_ONE, GL_ONE );
+				}
+
+				glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+				glDepthFunc( GL_LESS );
+			}
+			else
+			{
+				glDrawArrays( GL_TRIANGLES, 0, static_cast<GLsizei>( mesh->VertexCount( ) ) );
+			}
 		}
 	}
 

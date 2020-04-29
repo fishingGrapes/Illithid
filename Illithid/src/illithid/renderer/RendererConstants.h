@@ -15,7 +15,9 @@ namespace itd
 	enum Capability : int32_t
 	{
 		Cap_DepthTest = 0x0B71,
-		Cap_StencilTest = 0x0B90
+		Cap_StencilTest = 0x0B90,
+		Cap_Blending = 0x0BE2, 
+		Cap_CullFace = 0x0B44
 	};
 
 	enum PolygonMode : int32_t

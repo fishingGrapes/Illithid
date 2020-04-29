@@ -7,6 +7,8 @@
 #include "Material.h"
 #include "Texture2D.h"
 #include "LineSegment.h"
+
+#include "illithid/game/GameObject.h"
 #include "illithid/components/MeshRenderer.h"
 
 namespace itd

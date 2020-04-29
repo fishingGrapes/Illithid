@@ -44,7 +44,7 @@ namespace itd
 		{
 			auto renderer = gameObject->GetComponent<MeshRenderer>( );
 			renderer->Material->SetMatrix4f( "u_Model", gameObject->GetTransform( )->TRS( ) );
-			renderer->Material->SetVector4f( "u_Color", Color );
+			renderer->Material->SetVector4f( "u_Color", glm::vec4( Color, 1.0f ) );
 
 			Graphics::DrawMesh( *renderer->Mesh, *renderer->Material );
 		}

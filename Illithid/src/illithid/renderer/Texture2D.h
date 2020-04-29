@@ -22,12 +22,12 @@ namespace itd
 		void SetPixelData( const unsigned char* data );
 
 		void BindToTextureUnit( uint32_t unit) const;
+		static int32_t CalculateMipmapLevels( int32_t width, int32_t height );
 
 	private:
 		uint32_t id_;
 		int32_t width_, height_;
 		int32_t pixelFormat_;
 
-		static int32_t CalculateMipmapLevels( int32_t width, int32_t height );
 	};
 }

@@ -47,7 +47,7 @@ namespace itd
 		{
 		public:
 			std::shared_ptr<Texture2D> Texture;
-			int32_t Unit;
+			uint32_t Unit;
 		};
 
 		using UniformMap = std::unordered_map<std::string, UniformData>;

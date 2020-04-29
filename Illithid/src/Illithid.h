@@ -14,6 +14,7 @@
 #include "illithid/components/Transform.h"
 #include "illithid/components/Camera.h"
 #include "illithid/components/Light.h"
+#include "illithid/components/MeshRenderer.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/random.hpp"
@@ -23,8 +24,6 @@
 #include "illithid/renderer/Graphics.h"
 #include "illithid/game/GameObject.h"
 
-#include "illithid/components/MeshRenderer.h"
-#include "illithid/components/Transform.h"
 
 #include "illithid/utils/Array3D.h"
 #include "illithid/memory/GrowingBlockAllocator.h"

@@ -23,10 +23,16 @@ namespace itd
 		projectionMatrix_ = glm::ortho<float_t>( projection.Left, projection.Right, projection.Top, projection.Bottom, projection.Near, projection.Far );
 	}
 
-	glm::mat4 Camera::ViewProjection( )
+	glm::mat4 Camera::ViewProjection( ) const
 	{
 		return ( projectionMatrix_ * gameObject->GetTransform( )->InverseTRS( ) );
 	}
+
+	glm::mat4 Camera::ViewMatrix( ) const
+	{
+		return gameObject->GetTransform( )->InverseTRS( );
+	}
+
 
 	void Camera::OnStart( )
 	{

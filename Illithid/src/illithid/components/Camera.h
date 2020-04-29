@@ -36,7 +36,13 @@ namespace itd
 		void SetPerspectiveProjection( const PerspectiveProjection& projection );
 		void SetOrthographicProjection( const OrthographicProjection& projection );
 
-		glm::mat4 ViewProjection( );
+		glm::mat4 ViewProjection( ) const;
+		glm::mat4 Camera::ViewMatrix( ) const;
+
+		inline glm::mat4 Camera::ProjectionMatrix( ) const
+		{
+			return  projectionMatrix_;
+		}
 
 		virtual void OnStart( ) override;
 		virtual void OnUpdate( ) override;

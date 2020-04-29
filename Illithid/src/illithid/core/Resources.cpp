@@ -11,6 +11,6 @@ namespace itd
 		Shader colorShader( "Assets/Shaders/color.shader" );
 		UnlitMaterial = std::make_shared<Material>( colorShader );
 
-		CubeMesh = StaticMesh::Load( "Assets/Models/box.obj" );
+		CubeMesh = StaticMesh::Load( "Assets/Models/cube.obj" );
 	}
 }

@@ -16,13 +16,13 @@ namespace itd
 	public:
 
 		Light( LightType type = LightType::Directional )
-			: Type( type ), Color( glm::vec4( 1.0f ) )
+			: Type( type ), Color( glm::vec3( 1.0f ) )
 		{
 
 		}
 
-		glm::vec4 Color;
-		LightType Type;
+		glm::vec3 Color;
+		const LightType Type;
 
 		virtual void OnStart( ) override;
 		virtual void OnUpdate( ) override;
