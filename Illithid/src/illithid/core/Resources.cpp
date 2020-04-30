@@ -8,8 +8,8 @@ namespace itd
 
 	void Resources::Initialize( )
 	{
-		Shader colorShader( "Assets/Shaders/color.shader" );
-		UnlitMaterial = std::make_shared<Material>( colorShader );
+		Shader UnlitShader( "Assets/Shaders/color.shader" );
+		UnlitMaterial = std::make_shared<Material>( UnlitShader );
 
 		CubeMesh = StaticMesh::Load( "Assets/Models/cube.obj" );
 	}

@@ -78,6 +78,7 @@ namespace itd
 			Graphics::BuildRenderGraph( );
 			ComponentRegistry::Render( );
 			Graphics::DrawRenderGraph( );
+			Graphics::RenderSkyBox( );
 
 			Gui::Begin( );
 			//GUI Layer Code Here
@@ -125,9 +126,9 @@ namespace itd
 		Screen::height_ = window_->Height( );
 
 		Graphics::Initialize( window_ );
-		Input::Initialize( );
-
 		Resources::Initialize( );
+
+		Input::Initialize( );
 		Gui::Initialize( window_ );
 
 		this->RegisterEngineComponents( );
@@ -147,8 +148,8 @@ namespace itd
 		ComponentRegistry::Register<Transform>( false, false, false, false, true );
 		ComponentRegistry::Register<AxesGizmo>( true, false, true, true, false );
 		ComponentRegistry::Register<Camera>( false, false, false, false, false );
-		ComponentRegistry::Register<Light>( true, false, true, true, false );
-		ComponentRegistry::Register<MeshRenderer>( false, false, true, false, false );
+		ComponentRegistry::Register<Light>( true, false, true, false, false );
+		ComponentRegistry::Register<MeshRenderer>( false, false, false, false, false );
 
 	}
 

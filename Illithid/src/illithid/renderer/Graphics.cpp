@@ -8,11 +8,13 @@
 
 #include "illithid/components/Light.h"
 #include "illithid/components/Camera.h"
+#include "illithid/renderer/Skybox.h"
 
 namespace itd
 {
 
 	std::multiset<MeshRenderer*, Graphics::Comparator> Graphics::renderGraph_;
+	std::unique_ptr<Skybox> Graphics::skybox_;
 
 	void Graphics::Initialize( std::unique_ptr<Window>& window )
 	{
@@ -35,6 +37,7 @@ namespace itd
 		glEnable( GL_DEBUG_OUTPUT );
 		glDebugMessageCallback( GLErrorCallback, nullptr );
 #endif
+
 	}
 
 	void Graphics::Clear( int32_t bits )
@@ -110,13 +113,22 @@ namespace itd
 			if (current_program != prev_program)
 			{
 				material->Use( );
-				material->SetVector3f( "u_ViewPosition", Camera::Primary( )->gameObject->GetTransform( )->Position );
 				prev_program = current_program;
+
+				if (material->HasLightingPass)
+				{
+					material->SetVector3f( "u_ViewPosition", Camera::Primary( )->gameObject->GetTransform( )->Position );
+				}
 			}
+
+			material->SetMatrix4f( "u_ViewProjection", Camera::Primary( )->ViewProjection( ) );
+			material->SetMatrix4f( "u_Model", renderer->gameObject->GetTransform( )->TRS( ) );
 
 			mesh->Bind( );
 			if (material->HasLightingPass)
 			{
+				material->SetMatrix3f( "u_NormalMatrix", glm::mat3( glm::transpose( renderer->gameObject->GetTransform( )->InverseTRS( ) ) ) );
+
 				glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 				glDepthFunc( GL_LEQUAL );
 
@@ -135,7 +147,7 @@ namespace itd
 								material->SetVector3f( "u_DirectionalLight.diffuse", 0.4f * light->Color );
 								material->SetVector3f( "u_DirectionalLight.specular", 0.5f * light->Color );
 
-								lightingFunctionIndex = glGetSubroutineIndex( material->ProgramID( ), GL_FRAGMENT_SHADER, "CalculateDirectionLight" );
+								lightingFunctionIndex = glGetSubroutineIndex( static_cast<GLuint>( material->ProgramID( ) ), GL_FRAGMENT_SHADER, "CalculateDirectionLight" );
 								break;
 							}
 						case LightType::Point:
@@ -188,6 +200,17 @@ namespace itd
 				glDrawArrays( GL_TRIANGLES, 0, static_cast<GLsizei>( mesh->VertexCount( ) ) );
 			}
 		}
+
+	}
+
+	void Graphics::SetSkybox( const std::string& file )
+	{
+		skybox_.reset( new Skybox( file ) );
+	}
+
+	void Graphics::RenderSkyBox( )
+	{
+		skybox_->Render( );
 	}
 
 

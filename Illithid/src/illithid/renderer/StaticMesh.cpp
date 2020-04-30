@@ -23,6 +23,23 @@ namespace itd
 		glDeleteVertexArrays( 1, &VAO_ );
 	}
 
+	StaticMesh::StaticMesh( const StaticMesh& other )
+	{
+		VAO_ = other.VAO_;
+		VBO_ = other.VBO_;
+
+		vertices_ = other.vertices_;
+	}
+
+	StaticMesh& StaticMesh::operator=( const StaticMesh& other )
+	{
+		VAO_ = other.VAO_;
+		VBO_ = other.VBO_;
+
+		vertices_ = other.vertices_;
+		return *this;
+	}
+
 
 	void StaticMesh::CreateVertexArrayObject( )
 	{

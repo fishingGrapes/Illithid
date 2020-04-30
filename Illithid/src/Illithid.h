@@ -6,6 +6,7 @@
 #include "illithid/core/Screen.h"
 #include "illithid/core/Log.h"
 #include "illithid/core/Input.h"
+#include "illithid/core/Resources.h"
 
 #include "illithid/core/KeyCodes.h"
 #include "illithid/events/KeyEvents.h"

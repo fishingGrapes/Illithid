@@ -14,6 +14,8 @@
 namespace itd
 {
 	class Window;
+	class Skybox;
+
 	class Graphics
 	{
 	public:
@@ -32,13 +34,15 @@ namespace itd
 
 		static void BuildRenderGraph( );
 		static void DrawRenderGraph( );
+		static void SetSkybox( const std::string& file );
+		static void RenderSkyBox( );
 
 	private:
 		using GLenum = uint32_t;
 		using GLsizei = int32_t;
 		using GLchar = char;
 
-
+		static std::unique_ptr<Skybox> skybox_;
 		static void GLErrorCallback( GLenum source, GLenum type, GLenum id, GLenum severity, GLsizei length,
 									 const GLchar* message, const void* userParam );
 

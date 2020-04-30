@@ -34,6 +34,7 @@ using LineSegment = itd::LineSegment;
 
 using SceneManager = itd::SceneManager;
 using Scene = itd::Scene;
+using Resources = itd::Resources;
 
 class TestApplication : public itd::Application
 {
@@ -46,10 +47,14 @@ private:
 	GameObject* barrel01_;
 	GameObject* barrel02_;
 	GameObject* barrel03_;
+
 	GameObject* camera_;
+
 	GameObject* dirLight_;
 	GameObject* spotLight_;
+
 	std::array<GameObject*, 4> pointLights_;
+
 
 	std::vector<glm::vec3> pointLightPositions_ = {
 			glm::vec3( 0.7f,  0.2f,  2.0f ),
@@ -82,43 +87,39 @@ public:
 	{
 		std::shared_ptr<Scene> phongScene = std::make_shared<Scene>( );
 
-		Shader phongShader( "Assets/Shaders/phong.shader" );
-		std::shared_ptr<Material> phongMat01_ = std::make_unique<Material>( phongShader );
-		std::shared_ptr<Material> phongMat02_ = std::make_unique<Material>( phongShader );
-		std::shared_ptr<Material> phongMat03_ = std::make_unique<Material>( phongShader );
 
 		std::shared_ptr<Texture2D> barrel_diffuse = Texture2D::Load( "Assets/Textures/barrel_diffuse.tex2D" );
 		std::shared_ptr<Texture2D> barrel_specular = Texture2D::Load( "Assets/Textures/barrel_specular.tex2D" );
 
+		Shader phongShader( "Assets/Shaders/phong.shader" );
+		std::shared_ptr<Material> phongMat = std::make_shared<Material>( phongShader );
+		phongMat->SetTexture( "u_Material.diffuse", barrel_diffuse );
+		phongMat->SetTexture( "u_Material.specular", barrel_specular );
+		phongMat->SetFloat( "u_Material.shininess", 32.0f );
+
+		std::shared_ptr<StaticMesh> barrelMesh = StaticMesh::Load( "Assets/Models/barrel.obj" );
+
 		barrel01_ = GameObject::Instantiate( "Box_01" );
 		dptr<MeshRenderer> objRenderer_ = barrel01_->AddComponent<MeshRenderer>( );
-		objRenderer_->Mesh = StaticMesh::Load( "Assets/Models/barrel.obj" );
-		objRenderer_->Material = phongMat01_;
-		objRenderer_->Material->SetTexture( "u_Material.diffuse", barrel_diffuse );
-		objRenderer_->Material->SetTexture( "u_Material.specular", barrel_specular );
-		objRenderer_->Material->SetFloat( "u_Material.shininess", 32.0f );
+		objRenderer_->Mesh = barrelMesh;
+		objRenderer_->Material = phongMat;
 		barrel01_->GetTransform( )->Translate( glm::vec3( 0.0f, 0.0f, 0.0f ) );
 		barrel01_->GetTransform( )->Scale( glm::vec3( 0.25f, 0.25f, 0.25f ) );
 
 		barrel02_ = GameObject::Instantiate( "Box_02" );
 		objRenderer_ = barrel02_->AddComponent<MeshRenderer>( );
-		objRenderer_->Mesh = StaticMesh::Load( "Assets/Models/box.obj" );
-		objRenderer_->Material = phongMat02_;
-		objRenderer_->Material->SetTexture( "u_Material.diffuse", barrel_diffuse );
-		objRenderer_->Material->SetTexture( "u_Material.specular", barrel_specular );
-		objRenderer_->Material->SetFloat( "u_Material.shininess", 32.0f );
+		objRenderer_->Mesh = barrelMesh;
+		objRenderer_->Material = phongMat;
 		barrel02_->GetTransform( )->Translate( glm::vec3( -1.0f, -1.0f, 0.0f ) );
 		barrel02_->GetTransform( )->SetParent( barrel01_->GetTransform( ) );
 
 		barrel03_ = GameObject::Instantiate( "Box_02" );
 		objRenderer_ = barrel03_->AddComponent<MeshRenderer>( );
-		objRenderer_->Mesh = StaticMesh::Load( "Assets/Models/box.obj" );
-		objRenderer_->Material = phongMat03_;
-		objRenderer_->Material->SetTexture( "u_Material.diffuse", barrel_diffuse );
-		objRenderer_->Material->SetTexture( "u_Material.specular", barrel_specular );
-		objRenderer_->Material->SetFloat( "u_Material.shininess", 32.0f );
+		objRenderer_->Mesh = barrelMesh;
+		objRenderer_->Material = phongMat;
 		barrel03_->GetTransform( )->Translate( glm::vec3( -1.0f, -1.0f, 0.0f ) );
 		barrel03_->GetTransform( )->SetParent( barrel02_->GetTransform( ) );
+
 
 
 		camera_ = GameObject::Instantiate( "Camera" );
@@ -138,12 +139,13 @@ public:
 		phongScene->AddRootObject( dirLight_ );
 		phongScene->AddRootObject( spotLight_ );
 
-		for (size_t i = 0; i < 4; i++)
+		for (size_t i = 0; i < pointLights_.size( ); i++)
 		{
 			phongScene->AddRootObject( pointLights_[ i ] );
 		}
 
 		SceneManager::LoadScene( phongScene );
+		Graphics::SetSkybox( "Assets/Skyboxes/YokohamaNights.sbox" );
 	}
 
 	virtual void Shutdown( ) override
@@ -240,23 +242,23 @@ private:
 	{
 		dirLight_ = GameObject::Instantiate( "Dir_Light" );
 		auto lightComp = dirLight_->AddComponent<Light>( itd::LightType::Directional );
-		lightComp->Color = glm::vec3( 0.5f, 0.5f, 0.5f );
+		lightComp->Color = glm::vec3( 1.0f, 0.0f, 1.0f );
+
+
 	}
 
 	void CreatePointLights( )
 	{
-		for (size_t i = 0; i < pointLightPositions_.size( ); ++i)
+		for (size_t i = 0; i < pointLights_.size( ); ++i)
 		{
-			GameObject* go = GameObject::Instantiate( ( "Point_Light_" + std::to_string( i ) ) );
-			auto lightComp = go->AddComponent<Light>( itd::LightType::Point );
-			lightComp->Color = pointLightColors_[ i ];
+			pointLights_[ i ] = GameObject::Instantiate( "Point_Light_" + std::to_string( i ) );
 
-			go->GetTransform( )->Translate( pointLightPositions_[ i ] );
-			go->GetTransform( )->Scale( glm::vec3( 0.125f ) );
+			auto lightComp = pointLights_[ i ]->AddComponent<Light>( itd::LightType::Point );
+			lightComp->Color = glm::vec3( 1.0f, 0.682f, 0.259f );
 
-			pointLights_[ i ] = go;
+			pointLights_[ i ]->GetTransform( )->Translate( pointLightPositions_[ i ] );
+			pointLights_[ i ]->GetTransform( )->Scale( glm::vec3( 0.03125f ) );
 		}
-
 	}
 
 	void CreateSpotLight( )
@@ -264,6 +266,7 @@ private:
 		spotLight_ = GameObject::Instantiate( "Spot_Light" );
 		/*auto lightComp = spotLight_->AddComponent<Light>( itd::LightType::Spot );
 		lightComp->Color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );*/
+
 	}
 
 

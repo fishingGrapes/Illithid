@@ -15,9 +15,9 @@ namespace itd
 #if defined(IL_DEBUG) || defined(IL_RELEASE)
 		if (Type == LightType::Point)
 		{
-			auto renderer = gameObject->AddComponent<MeshRenderer>( );
-			renderer->Material = Resources::UnlitMaterial;
+			auto& renderer = gameObject->AddComponent<MeshRenderer>( );
 			renderer->Mesh = Resources::CubeMesh;
+			renderer->Material = std::make_shared<Material>( Shader( "Assets/Shaders/color.shader" ) );
 		}
 #endif
 	}
@@ -31,7 +31,8 @@ namespace itd
 #if defined(IL_DEBUG) || defined(IL_RELEASE)
 		if (Type == LightType::Point)
 		{
-			gameObject->GetComponent<MeshRenderer>( )->Material->SetMatrix4f( "u_ViewProjection", Camera::Primary( )->ViewProjection( ) );
+			auto& renderer = gameObject->GetComponent<MeshRenderer>( );
+			renderer->Material->SetVector4f( "u_Color", glm::vec4( Color, 1.0f ) );
 		}
 #endif
 
@@ -39,16 +40,7 @@ namespace itd
 
 	void Light::OnRender( )
 	{
-#if defined(IL_DEBUG) || defined(IL_RELEASE)
-		if (Type == LightType::Point)
-		{
-			auto renderer = gameObject->GetComponent<MeshRenderer>( );
-			renderer->Material->SetMatrix4f( "u_Model", gameObject->GetTransform( )->TRS( ) );
-			renderer->Material->SetVector4f( "u_Color", glm::vec4( Color, 1.0f ) );
 
-			Graphics::DrawMesh( *renderer->Mesh, *renderer->Material );
-		}
-#endif
 	}
 
 	void Light::OnPostRender( )
