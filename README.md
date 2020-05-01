@@ -32,7 +32,7 @@ An implementation of Entity-Component architecture inspired by Unity3D and Unrea
 I needed to iterate through a collection of components(similar to Unity3D) every frame. There are game objects which are composed of components and these components contain behaviour like Transform, Camera, Light, Mesh Renderer and so on, which need to be updated every frame. I could not afford to iterate through components at different places in memory. So I wrote this allocactor which is nothing but a list of fixed-size memory blocks and actively keeps the objects tightly packed on allocation and deallocation, so as to ensure the best cache locality and fast iterations.
 
 ## Usage
-Here is a quick overview of how to use the fraemwork API.
+Here is a quick overview of how to use the framework API.
 
 ```c++
 #pragma once
