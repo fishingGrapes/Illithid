@@ -33,6 +33,7 @@ I needed to iterate through a collection of components(similar to Unity3D) every
 
 ## Usage
 Here is a quick overview of how to use the fraemwork API.
+
 ```c++
 #pragma once
 
@@ -49,7 +50,7 @@ private:
 	GameObject* barrel02_;
 	GameObject* barrel03_;
 
-	GameObject* camera_;
+	GameObject* cameraObject_;
 	GameObject* dirLight_;
 
 
@@ -85,38 +86,38 @@ public:
 
 		//Start Creating game objects
 		barrel01_ = GameObject::Instantiate( "Box_01" );
-		dptr<MeshRenderer> objRenderer_ = barrel01_->AddComponent<MeshRenderer>( );
-		objRenderer_->Mesh = barrelMesh;
-		objRenderer_->Material = phongMat;
+		dptr<MeshRenderer> barrelRenderer01 = barrel01_->AddComponent<MeshRenderer>( );
+		barrelRenderer01->Mesh = barrelMesh;
+		barrelRenderer01->Material = phongMat;
 		barrel01_->GetTransform( )->Translate( glm::vec3( 0.0f, 0.0f, 0.0f ) );
 		barrel01_->GetTransform( )->Scale( glm::vec3( 0.25f, 0.25f, 0.25f ) );
 
 		barrel02_ = GameObject::Instantiate( "Box_02" );
-		objRenderer_ = barrel02_->AddComponent<MeshRenderer>( );
-		objRenderer_->Mesh = barrelMesh;
-		objRenderer_->Material = phongMat;
+		dptr<MeshRenderer>  barrelRenderer02 = barrel02_->AddComponent<MeshRenderer>( );
+		barrelRenderer02->Mesh = barrelMesh;
+		barrelRenderer02->Material = phongMat;
 		barrel02_->GetTransform( )->Translate( glm::vec3( -1.0f, -1.0f, 0.0f ) );
 		barrel02_->GetTransform( )->SetParent( barrel01_->GetTransform( ) );
 
 		barrel03_ = GameObject::Instantiate( "Box_02" );
-		objRenderer_ = barrel03_->AddComponent<MeshRenderer>( );
-		objRenderer_->Mesh = barrelMesh;
-		objRenderer_->Material = phongMat;
+		dptr<MeshRenderer>  barrelRenderer03 = barrel03_->AddComponent<MeshRenderer>( );
+		barrelRenderer03->Mesh = barrelMesh;
+		barrelRenderer03->Material = phongMat;
 		barrel03_->GetTransform( )->Translate( glm::vec3( -1.0f, -1.0f, 0.0f ) );
 		barrel03_->GetTransform( )->SetParent( barrel02_->GetTransform( ) );
 
-		camera_ = GameObject::Instantiate( "Camera" );
-		camera_->GetTransform( )->Translate( glm::vec3( 0.0f, 0.0f, 1.0f ) );
-		auto cam = camera_->AddComponent<Camera>( );
+		cameraObject_ = GameObject::Instantiate( "Camera" );
+		cameraObject_->GetTransform( )->Translate( glm::vec3( 0.0f, 0.0f, 1.0f ) );
+		dptr<Camera> camera = cameraObject_->AddComponent<Camera>( );
 
 		//Set Camera projection
-		cam->SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
-		Camera::SetAsPrimary( cam );
+		camera->SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
+		Camera::SetAsPrimary( camera );
 
 
 		//Create the Scene Hierarchy
 		phongScene->AddRootObject( barrel01_ );
-		phongScene->AddRootObject( camera_ );
+		phongScene->AddRootObject( cameraObject_ );
 		phongScene->AddRootObject( dirLight_ );
 		phongScene->AddRootObject( spotLight_ );
 
@@ -143,7 +144,7 @@ public:
 		EventDispatcher dispatcher( event );
 		dispatcher.Dispatch<WindowResizedEvent>( [ this ] ( WindowResizedEvent& evnt ) -> bool
 		{
-			camera_->GetComponent<Camera>( )->SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
+			cameraObject_->GetComponent<Camera>( )->SetPerspectiveProjection( PerspectiveProjection{ glm::radians( 60.0f ), Screen::Width( ) / static_cast<float_t>( Screen::Height( ) ), 0.1f, 100.0f } );
 			return false;
 		} );
 	}
@@ -159,22 +160,22 @@ public:
 		//Input API
 		if (Input::IsKeyDown( KeyCode::W ) || Input::IsKeyHeld( KeyCode::W ))
 		{
-			camera_->GetTransform( )->Translate( Time::Delta( ) * camera_->GetTransform( )->Forward( ) );
+			cameraObject_->GetTransform( )->Translate( Time::Delta( ) * cameraObject_->GetTransform( )->Forward( ) );
 		}
 
 		if (Input::IsKeyDown( KeyCode::S ) || Input::IsKeyHeld( KeyCode::S ))
 		{
-			camera_->GetTransform( )->Translate( Time::Delta( ) * camera_->GetTransform( )->Forward( ) * -1.0f );
+			cameraObject_->GetTransform( )->Translate( Time::Delta( ) * cameraObject_->GetTransform( )->Forward( ) * -1.0f );
 		}
 
 		if (Input::IsKeyDown( KeyCode::A ) || Input::IsKeyHeld( KeyCode::A ))
 		{
-			camera_->GetTransform( )->Translate( Time::Delta( ) * camera_->GetTransform( )->Right( ) * -1.0f );
+			cameraObject_->GetTransform( )->Translate( Time::Delta( ) * cameraObject_->GetTransform( )->Right( ) * -1.0f );
 		}
 
 		if (Input::IsKeyDown( KeyCode::D ) || Input::IsKeyHeld( KeyCode::D ))
 		{
-			camera_->GetTransform( )->Translate( Time::Delta( ) * camera_->GetTransform( )->Right( ) );
+			cameraObject_->GetTransform( )->Translate( Time::Delta( ) * cameraObject_->GetTransform( )->Right( ) );
 		}
 
 		if (Input::IsKeyDown( KeyCode::ESCAPE ))
@@ -187,6 +188,10 @@ public:
 	{
 		//Logging facility
 		IL_TRACE( "Shutdown" );
+		
+		//Destroying a game object
+		//Everything in the Scene heirarchy is automatically destroy on Scene unloading
+		GameObject::Destroy( dirLight_ );
 	}
 
 };
