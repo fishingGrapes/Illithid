@@ -8,7 +8,7 @@ A simple game framework I am making for learning purposes. It has an OpenGL rend
 - [x] Entity-Component Architecture
 - [x] Basic Input Handling
 - [x] Object loading and Mesh Rendering
-- [x] Phong Shading
+- [x] Blinn-Phong Shading
 - [ ] Physically based Rendering
 - [x] Forward lighting pass
 - [x] Skyboxes

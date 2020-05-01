@@ -95,7 +95,7 @@ public:
 		std::shared_ptr<Material> phongMat = std::make_shared<Material>( phongShader );
 		phongMat->SetTexture( "u_Material.diffuse", barrel_diffuse );
 		phongMat->SetTexture( "u_Material.specular", barrel_specular );
-		phongMat->SetFloat( "u_Material.shininess", 32.0f );
+		phongMat->SetFloat( "u_Material.shininess", 128.0f );
 
 		std::shared_ptr<StaticMesh> barrelMesh = StaticMesh::Load( "Assets/Models/barrel.obj" );
 

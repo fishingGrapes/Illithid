@@ -89,8 +89,8 @@ vec3 CalculateDirectionLight(vec3 normal, vec3 viewDirection)
 	//diffusion
 	float diffusion = max(dot(normal , inverseLightDirection), 0.0);
 	//specularity
-	vec3 reflectedDirection = reflect(-inverseLightDirection, normal);
-	float specularity = pow(max(dot(viewDirection, reflectedDirection), 0.0), u_Material.shininess );
+    vec3 halfwayDirection = normalize(inverseLightDirection + viewDirection);  
+	float specularity = pow(max(dot(normal, halfwayDirection), 0.0), u_Material.shininess );
 
 	vec3 ambientComponent = u_DirectionalLight.ambient * vec3(texture(u_Material.diffuse, texCoords));
 	vec3 diffuseComponent = u_DirectionalLight.diffuse * diffusion * vec3(texture(u_Material.diffuse, texCoords));
@@ -107,8 +107,8 @@ vec3 CalculatePointLight(vec3 normal, vec3 viewDirection)
 	//diffusion
 	float diffusion = max(dot(normal , inverseLightDirection), 0.0);
 	//specularity
-	vec3 reflectedDirection = reflect(-inverseLightDirection, normal);
-	float specularity = pow(max(dot(viewDirection, reflectedDirection), 0.0), u_Material.shininess );
+    vec3 halfwayDirection = normalize(inverseLightDirection + viewDirection);  
+	float specularity = pow(max(dot(normal, halfwayDirection), 0.0), u_Material.shininess );
 	//attenuation
 	float distance = length(u_PointLight.position - fragPosition);
 	float attenuation = 1.0 / (u_PointLight.constant + u_PointLight.linear * distance + u_PointLight.quadratic * (distance * distance));
@@ -132,8 +132,8 @@ vec3 CalculateSpotLight(vec3 normal, vec3 viewDirection)
 	//diffusion
 	float diffusion = max(dot(normal , inverseLightDirection), 0.0);
 	//specularity
-	vec3 reflectedDirection = reflect(-inverseLightDirection, normal);
-	float specularity = pow(max(dot(viewDirection, reflectedDirection), 0.0), u_Material.shininess );
+	vec3 halfwayDirection = normalize(inverseLightDirection + viewDirection);  
+	float specularity = pow(max(dot(normal, halfwayDirection), 0.0), u_Material.shininess );
 	//attenuation
 	float distance = length(u_SpotLight.position - fragPosition);
 	float attenuation = 1.0 / (u_SpotLight.constant + u_SpotLight.linear * distance + u_SpotLight.quadratic * (distance * distance));
