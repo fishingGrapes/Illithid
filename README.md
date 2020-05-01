@@ -1,4 +1,4 @@
-# Illithid Game Engine
+# Illithid Game Framework
 A simple game framework I am making for learning purposes. It has an OpenGL renderer core and uses a Entity-Component architecture for interacting. This is a highly WIP.
 
 ![engineloop](https://github.com/fishingGrapes/Illithid/blob/master/images/engine.gif)
