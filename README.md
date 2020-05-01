@@ -85,25 +85,30 @@ public:
 		std::shared_ptr<StaticMesh> barrelMesh = StaticMesh::Load( "Assets/Models/barrel.obj" );
 
 		//Start Creating game objects
-		barrel01_ = GameObject::Instantiate( "Box_01" );
+		barrel01_ = GameObject::Instantiate( "Barrel_01" );
 		dptr<MeshRenderer> barrelRenderer01 = barrel01_->AddComponent<MeshRenderer>( );
 		barrelRenderer01->Mesh = barrelMesh;
 		barrelRenderer01->Material = phongMat;
 		barrel01_->GetTransform( )->Translate( glm::vec3( 0.0f, 0.0f, 0.0f ) );
 		barrel01_->GetTransform( )->Scale( glm::vec3( 0.25f, 0.25f, 0.25f ) );
 
-		barrel02_ = GameObject::Instantiate( "Box_02" );
+		barrel02_ = GameObject::Instantiate( "Barrel_02" );
 		dptr<MeshRenderer>  barrelRenderer02 = barrel02_->AddComponent<MeshRenderer>( );
 		barrelRenderer02->Mesh = barrelMesh;
 		barrelRenderer02->Material = phongMat;
 		barrel02_->GetTransform( )->Translate( glm::vec3( -1.0f, -1.0f, 0.0f ) );
+		
+		//Setting the parent and creating scene hierarchy
+		//Barrel_01 is the parent of Barrel_02
 		barrel02_->GetTransform( )->SetParent( barrel01_->GetTransform( ) );
 
-		barrel03_ = GameObject::Instantiate( "Box_02" );
+		barrel03_ = GameObject::Instantiate( "Barrel_03" );
 		dptr<MeshRenderer>  barrelRenderer03 = barrel03_->AddComponent<MeshRenderer>( );
 		barrelRenderer03->Mesh = barrelMesh;
 		barrelRenderer03->Material = phongMat;
 		barrel03_->GetTransform( )->Translate( glm::vec3( -1.0f, -1.0f, 0.0f ) );
+		
+		//Barrel_02 is the parent of Barrel_03
 		barrel03_->GetTransform( )->SetParent( barrel02_->GetTransform( ) );
 
 		cameraObject_ = GameObject::Instantiate( "Camera" );
