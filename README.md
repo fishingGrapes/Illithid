@@ -12,6 +12,7 @@ A simple game framework I am making for learning purposes. It has an OpenGL rend
 - [ ] Physically based Rendering
 - [x] Forward lighting pass
 - [x] Skyboxes
+- [ ] Normal Mapping
 - [ ] Shadow mapping
 - [ ] Post-Processing
 - [x] Scene Hierarchy
